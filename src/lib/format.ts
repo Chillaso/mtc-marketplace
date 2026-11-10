@@ -1,3 +1,6 @@
+/** Ruta a una imagen de public/img respetando la base del despliegue (p. ej. GitHub Pages). */
+export const img = (name: string) => `${import.meta.env.BASE_URL}img/${name}`
+
 const DAY = 86_400_000
 
 /** Fecha ISO de hace `days` días; con hora opcional (hh, mm). */

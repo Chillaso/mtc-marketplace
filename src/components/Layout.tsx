@@ -24,6 +24,7 @@ import { useMe, useStore } from '../store'
 import { Avatar } from './ui'
 import { cx, fmtWhen } from '../lib/format'
 import { DEMO_CAREGIVER_ID, DEMO_FAMILY_ID } from '../data/seed'
+import { img } from '../lib/format'
 
 function useClickOutside(open: boolean, close: () => void) {
   const ref = useRef<HTMLDivElement>(null)
@@ -39,7 +40,7 @@ function useClickOutside(open: boolean, close: () => void) {
 export function Logo({ className }: { className?: string }) {
   return (
     <Link to="/" aria-label="María te Cuida, inicio" className={cx('inline-flex shrink-0', className)}>
-      <img src="/img/logo.png" alt="María te Cuida" className="h-11 w-auto sm:h-[52px]" />
+      <img src={img("logo.png")} alt="María te Cuida" className="h-11 w-auto sm:h-[52px]" />
     </Link>
   )
 }

@@ -2,7 +2,7 @@ import type { DemoState, SearchFilters, Family, Message } from './types'
 import { seedCaregivers } from './caregivers'
 import { ago, minutesAgo } from '../lib/format'
 
-export const STATE_VERSION = 3
+export const STATE_VERSION = 4
 
 /** Cuentas de demostración. */
 export const DEMO_FAMILY_ID = 'fam-martinez'

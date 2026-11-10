@@ -31,6 +31,7 @@ import { emptyFilters } from '../data/seed'
 import { activeCount, search } from '../lib/search'
 import { cx, shortName, yearsLabel } from '../lib/format'
 import { jornadaText } from '../components/CaregiverProfileView'
+import { img } from '../lib/format'
 
 const toggle = <T,>(arr: T[], v: T) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v])
 
@@ -163,7 +164,7 @@ export function SearchHome() {
   return (
     <>
       <section className="relative overflow-hidden bg-gradient-to-r from-white via-white to-brand-50">
-        <img src="/img/manos.jpg" alt="" className="absolute top-0 right-0 hidden h-full w-[42%] object-cover [mask-image:linear-gradient(to_right,transparent,black_35%)] md:block" />
+        <img src={img("manos.jpg")} alt="" className="absolute top-0 right-0 hidden h-full w-[42%] object-cover [mask-image:linear-gradient(to_right,transparent,black_35%)] md:block" />
         <Container className="relative py-8 sm:py-12">
           <h1 className="text-[32px] leading-tight font-bold sm:text-5xl md:max-w-[60%]">Hola{me.greetingName && me.role === 'family' ? `, ${me.greetingName}` : ''}, ¿en qué podemos ayudarte?</h1>
           <p className="mt-2 text-lg text-ink-soft">Encuentra la cuidadora que mejor se adapte a tu familia.</p>

@@ -14,7 +14,7 @@ import { IntegralService, NotFound, Trust } from './pages/Info'
 export default function App() {
   return (
     <StoreProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route element={<AppLayout />}>
             <Route index element={<Landing />} />

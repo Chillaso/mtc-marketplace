@@ -6,6 +6,7 @@ import { Button } from '../components/ui'
 import { emptyDraft, STEPS, StepHeader, validateStep } from '../components/CaregiverForm'
 import { useStore, type CaregiverDraft } from '../store'
 import { cx, uid } from '../lib/format'
+import { img } from '../lib/format'
 
 /** Datos de ejemplo para rellenar cada paso rápidamente durante una demo. */
 function sampleFor(step: number, d: CaregiverDraft): Partial<CaregiverDraft> {
@@ -100,7 +101,7 @@ export default function CaregiverRegister() {
         {step === 1 && (
           <div className="relative hidden md:block">
             <div className="absolute -inset-4 rounded-[50%_50%_45%_55%/40%_40%_60%_60%] bg-gradient-to-br from-brand-100 to-rosa-100" />
-            <img src="/img/registro.jpg" alt="Cuidadora sonriendo junto a una persona mayor" className="relative aspect-[440/690] w-full rounded-[44%_44%_38%_38%/26%_26%_22%_22%] object-cover" />
+            <img src={img("registro.jpg")} alt="Cuidadora sonriendo junto a una persona mayor" className="relative aspect-[440/690] w-full rounded-[44%_44%_38%_38%/26%_26%_22%_22%] object-cover" />
           </div>
         )}
         <div className="min-w-0">

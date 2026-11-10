@@ -18,6 +18,7 @@ import { Container } from '../components/Layout'
 import { Avatar, Button, IconBubble, Stars, TrustedBadge } from '../components/ui'
 import { useStore } from '../store'
 import { shortName } from '../lib/format'
+import { img } from '../lib/format'
 
 export default function Landing() {
   const { state } = useStore()
@@ -59,7 +60,7 @@ export default function Landing() {
           <div className="relative -mx-4 md:mx-0">
             <div className="absolute -inset-6 -z-0 rounded-[48%_52%_40%_60%/55%_45%_55%_45%] bg-brand-50" />
             <img
-              src="/img/hero.jpg"
+              src={img("hero.jpg")}
               alt="Una cuidadora sonríe junto a una señora mayor"
               className="relative z-10 aspect-[549/640] w-full rounded-[46%_54%_8%_44%/40%_36%_10%_46%] object-cover shadow-pop md:max-h-[620px]"
             />

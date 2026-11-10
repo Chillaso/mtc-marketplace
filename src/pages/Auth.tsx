@@ -5,6 +5,7 @@ import { Container } from '../components/Layout'
 import { Button, Field, IconInput, InfoNote, Select } from '../components/ui'
 import { useStore } from '../store'
 import { PERSON_TYPES, ZONES } from '../data/catalog'
+import { img } from '../lib/format'
 
 export function PasswordInput({ value, onChange, invalid }: { value: string; onChange: (v: string) => void; invalid?: boolean }) {
   const [show, setShow] = useState(false)
@@ -122,7 +123,7 @@ export function FamilyRegister() {
 
   return (
     <Container className="grid max-w-6xl items-center gap-10 py-10 md:grid-cols-[0.9fr_1.1fr] md:py-14">
-      <img src="/img/manos.jpg" alt="" className="hidden aspect-[4/5] w-full rounded-[40%_60%_20%_50%/30%_30%_30%_40%] object-cover shadow-pop md:block" />
+      <img src={img("manos.jpg")} alt="" className="hidden aspect-[4/5] w-full rounded-[40%_60%_20%_50%/30%_30%_30%_40%] object-cover shadow-pop md:block" />
       <div>
         <h1 className="text-4xl font-bold text-brand-950 sm:text-5xl">Registro de familia</h1>
         <p className="mt-3 text-lg text-ink-soft">Crea tu cuenta para guardar favoritas, enviar solicitudes y hablar con las cuidadoras.</p>

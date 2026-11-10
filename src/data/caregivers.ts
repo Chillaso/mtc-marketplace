@@ -1,6 +1,7 @@
 import type { Caregiver } from './types'
 import { TASKS } from './catalog'
 import { ago } from '../lib/format'
+import { img } from '../lib/format'
 
 type Seed = Partial<Caregiver> & Pick<Caregiver, 'id' | 'name' | 'zone' | 'experienceYears'>
 
@@ -46,7 +47,7 @@ const seeds: Seed[] = [
   {
     id: 'laura-m',
     name: 'Laura Moreno',
-    photo: '/img/laura.jpg',
+    photo: img('laura.jpg'),
     zone: 'El Puerto',
     extraZones: ['Puerto Real', 'Jerez'],
     experienceYears: 5,
@@ -71,7 +72,7 @@ const seeds: Seed[] = [
   {
     id: 'carmen-r',
     name: 'Carmen Ruiz',
-    photo: '/img/carmen.jpg',
+    photo: img('carmen.jpg'),
     zone: 'Jerez',
     extraZones: ['Arcos'],
     experienceYears: 8,
@@ -94,7 +95,7 @@ const seeds: Seed[] = [
   {
     id: 'ana-s',
     name: 'Ana Sánchez',
-    photo: '/img/ana-s.jpg',
+    photo: img('ana-s.jpg'),
     zone: 'Cádiz',
     extraZones: ['San Fernando'],
     experienceYears: 6,
