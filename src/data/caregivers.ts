@@ -1,0 +1,167 @@
+import type { Caregiver } from './types'
+import { TASKS } from './catalog'
+import { ago } from '../lib/format'
+
+type Seed = Partial<Caregiver> & Pick<Caregiver, 'id' | 'name' | 'zone' | 'experienceYears'>
+
+const ALL_TASKS = Object.fromEntries(TASKS.map((t) => [t.id, t.subtasks.slice(0, 2)]))
+
+function pickTasks(ids: string[]): Record<string, string[]> {
+  return Object.fromEntries(ids.map((id) => [id, ALL_TASKS[id] ?? []]))
+}
+
+function cg(s: Seed, i: number): Caregiver {
+  const first = s.name.split(' ')[0].toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  return {
+    email: `${first}.${s.id}@ejemplo.com`,
+    phone: `6${String(10000000 + i * 7919).slice(0, 8)}`,
+    spanish: true,
+    extraZones: [],
+    careTypes: ['mayores'],
+    illnesses: [],
+    workplaces: ['domicilio'],
+    experienceText: '',
+    tasks: pickTasks(['aseo', 'movilidad', 'acompanamiento', 'hogar']),
+    training: ['sociosanitaria'],
+    drivingLicense: false,
+    vehicle: false,
+    jornadas: ['parcial'],
+    days: [0, 1, 2, 3, 4],
+    languages: ['Español'],
+    about: '',
+    highlights: [],
+    rating: 4.6,
+    reviews: 12,
+    trusted: false,
+    docsStatus: 'revisada',
+    documents: [],
+    declarationSignedAt: ago(60 + i),
+    available: true,
+    createdAt: ago(90 + i * 3),
+    ...s,
+  }
+}
+
+const seeds: Seed[] = [
+  {
+    id: 'laura-m',
+    name: 'Laura Moreno',
+    photo: '/img/laura.jpg',
+    zone: 'El Puerto',
+    extraZones: ['Puerto Real', 'Jerez'],
+    experienceYears: 5,
+    careTypes: ['mayores', 'dependencia', 'alzheimer', 'movilidad'],
+    illnesses: ['alzheimer', 'parkinson', 'diabetes'],
+    workplaces: ['domicilio', 'residencia'],
+    tasks: pickTasks(['aseo', 'vestir', 'movilidad', 'alimentacion', 'medicacion', 'acompanamiento']),
+    training: ['sociosanitaria', 'tcae', 'primeros'],
+    jornadas: ['parcial'],
+    days: [0, 1, 2, 3, 4],
+    languages: ['Español', 'Inglés'],
+    about:
+      'Cuidadora con experiencia en el acompañamiento de personas mayores, incluyendo deterioro cognitivo y Alzheimer. Cercana, responsable y con vocación de cuidado.',
+    experienceText:
+      'He trabajado tres años en una residencia de El Puerto y dos años en domicilios particulares cuidando a personas mayores con Alzheimer.',
+    highlights: ['Cuidado de personas mayores', 'Deterioro cognitivo y Alzheimer', 'Apoyo en la movilidad y actividades diarias'],
+    rating: 5,
+    reviews: 37,
+    trusted: true,
+    drivingLicense: true,
+  },
+  {
+    id: 'carmen-r',
+    name: 'Carmen Ruiz',
+    photo: '/img/carmen.jpg',
+    zone: 'Jerez',
+    extraZones: ['Arcos'],
+    experienceYears: 8,
+    careTypes: ['mayores', 'dependencia', 'postoperatorio'],
+    illnesses: ['ictus', 'corazon', 'diabetes'],
+    workplaces: ['domicilio', 'hospital'],
+    tasks: pickTasks(['aseo', 'vestir', 'movilidad', 'alimentacion', 'comidas', 'medicacion', 'nocturnos']),
+    training: ['tcae', 'primeros'],
+    jornadas: ['completa', 'noches'],
+    days: [0, 1, 2, 3, 4, 5],
+    about:
+      'Auxiliar de enfermería con ocho años cuidando a personas dependientes en casa y en el hospital. Paciente, organizada y muy atenta a los detalles.',
+    experienceText: 'Ocho años como auxiliar en el Hospital de Jerez y en domicilios, con pacientes tras ictus y cirugías.',
+    highlights: ['Recuperación tras ictus', 'Cuidados postoperatorios', 'Control de medicación y constantes'],
+    rating: 4.9,
+    reviews: 42,
+    drivingLicense: true,
+    vehicle: true,
+  },
+  {
+    id: 'ana-s',
+    name: 'Ana Sánchez',
+    photo: '/img/ana-s.jpg',
+    zone: 'Cádiz',
+    extraZones: ['San Fernando'],
+    experienceYears: 6,
+    careTypes: ['mayores', 'movilidad', 'discapacidad'],
+    illnesses: ['parkinson', 'respiracion'],
+    tasks: pickTasks(['aseo', 'movilidad', 'comidas', 'acompanamiento', 'hogar', 'nocturnos']),
+    training: ['primeros', 'dependientes'],
+    jornadas: ['interna', 'finde'],
+    days: [0, 1, 2, 3, 4, 5, 6],
+    languages: ['Español', 'Portugués'],
+    about: 'Me encanta acompañar y dar autonomía a las personas que cuido. Experiencia como interna y en fines de semana.',
+    highlights: ['Movilidad reducida y grúa', 'Cuidadora interna', 'Cocina casera adaptada'],
+    rating: 4.3,
+    reviews: 29,
+  },
+  {
+    id: 'ana-g',
+    name: 'Ana García',
+    zone: 'Jerez',
+    extraZones: ['El Puerto'],
+    experienceYears: 7,
+    email: 'ana.garcia@demo.mariatecuida.es',
+    phone: '612 345 678',
+    careTypes: ['mayores', 'dependencia', 'alzheimer'],
+    illnesses: ['alzheimer', 'diabetes', 'corazon'],
+    workplaces: ['domicilio', 'centro-dia'],
+    tasks: pickTasks(['aseo', 'vestir', 'alimentacion', 'comidas', 'medicacion', 'acompanamiento']),
+    training: ['sociosanitaria', 'especializados', 'primeros'],
+    jornadas: ['parcial', 'horas'],
+    days: [0, 1, 2, 3, 4],
+    languages: ['Español', 'Inglés'],
+    about:
+      'Soy cuidadora desde hace siete años. Me gusta trabajar con calma, respetando las rutinas de cada persona y manteniendo a la familia siempre informada.',
+    experienceText:
+      'Cuatro años en un centro de día de Jerez con personas con demencia y tres años en domicilios particulares acompañando a personas mayores.',
+    highlights: ['Estimulación cognitiva', 'Personas con demencia', 'Comunicación cercana con la familia'],
+    rating: 4.8,
+    reviews: 18,
+    drivingLicense: true,
+    documents: [
+      { id: 'd1', kind: 'DNI (anverso y reverso)', fileName: 'dni_ana_garcia.pdf', status: 'revisada', uploadedAt: ago(40) },
+      { id: 'd2', kind: 'Certificado de Atención Sociosanitaria', fileName: 'certificado_sociosanitaria.pdf', status: 'revisada', uploadedAt: ago(40) },
+      { id: 'd3', kind: 'Curso de demencias', fileName: 'curso_demencias_2025.pdf', status: 'en_revision', uploadedAt: ago(5) },
+    ],
+  },
+  { id: 'rocio-p', name: 'Rocío Pérez', zone: 'San Fernando', experienceYears: 3, careTypes: ['mayores', 'ninos'], training: ['dependientes'], jornadas: ['horas', 'parcial'], days: [0, 2, 4], rating: 4.7, reviews: 9, about: 'Cariñosa y alegre. Acompaño a personas mayores en paseos, gestiones y citas médicas.', highlights: ['Acompañamiento a citas', 'Paseos y ocio'] },
+  { id: 'milagros-v', name: 'Milagros Vargas', spanish: false, nationality: 'Perú', zone: 'Jerez', experienceYears: 12, careTypes: ['mayores', 'dependencia', 'paliativos'], illnesses: ['oncologia', 'respiracion'], training: ['tcae', 'primeros'], jornadas: ['interna'], days: [0, 1, 2, 3, 4, 5], rating: 4.9, reviews: 51, trusted: true, about: 'Doce años como cuidadora interna, con experiencia en cuidados paliativos y acompañamiento al final de la vida.', highlights: ['Cuidados paliativos', 'Interna con experiencia', 'Oxigenoterapia'], tasks: pickTasks(['aseo', 'vestir', 'movilidad', 'alimentacion', 'medicacion', 'nocturnos', 'hogar']) },
+  { id: 'isabel-d', name: 'Isabel Domínguez', zone: 'Chiclana', experienceYears: 4, careTypes: ['mayores', 'alzheimer'], illnesses: ['alzheimer'], training: ['especializados'], jornadas: ['parcial'], days: [0, 1, 2, 3, 4], rating: 4.5, reviews: 14, about: 'Formada en estimulación cognitiva. Trabajo con paciencia y mucha escucha.', highlights: ['Estimulación cognitiva', 'Alzheimer en fase inicial'] },
+  { id: 'gabriela-s', name: 'Gabriela Suárez', spanish: false, nationality: 'Colombia', zone: 'El Puerto', experienceYears: 9, careTypes: ['mayores', 'dependencia', 'movilidad'], illnesses: ['ictus', 'parkinson'], training: ['sociosanitaria', 'primeros'], jornadas: ['completa', 'interna'], days: [0, 1, 2, 3, 4, 5, 6], rating: 4.8, reviews: 33, trusted: true, drivingLicense: true, about: 'Responsable y muy organizada. Experiencia con grúa, cambios posturales y rehabilitación en casa.', highlights: ['Rehabilitación en casa', 'Uso de grúa', 'Personas tras ictus'] },
+  { id: 'pilar-n', name: 'Pilar Navarro', zone: 'Puerto Real', experienceYears: 15, careTypes: ['mayores', 'dependencia'], training: ['tcae'], jornadas: ['completa'], days: [0, 1, 2, 3, 4], rating: 4.7, reviews: 26, about: 'Quince años de experiencia como auxiliar de enfermería. Seriedad y cariño en el trato.', highlights: ['Auxiliar de enfermería', 'Larga experiencia'] },
+  { id: 'yolanda-c', name: 'Yolanda Castro', zone: 'Rota', experienceYears: 2, careTypes: ['mayores'], training: ['primeros'], jornadas: ['horas', 'finde'], days: [5, 6], rating: 4.4, reviews: 6, about: 'Disponible fines de semana y por horas. Ideal para dar respiro a las familias.', highlights: ['Fines de semana', 'Respiro familiar'] },
+  { id: 'oksana-k', name: 'Oksana Kovalenko', spanish: false, nationality: 'Ucrania', zone: 'Cádiz', experienceYears: 6, careTypes: ['mayores', 'discapacidad'], training: ['dependientes'], jornadas: ['interna', 'completa'], days: [0, 1, 2, 3, 4, 5], languages: ['Español', 'Ucraniano', 'Inglés'], rating: 4.6, reviews: 15, about: 'Trabajadora, puntual y discreta. Experiencia con adultos con discapacidad intelectual.', highlights: ['Discapacidad intelectual', 'Cuidadora interna'] },
+  { id: 'maria-l', name: 'María López', zone: 'Jerez', experienceYears: 10, careTypes: ['mayores', 'dependencia', 'alzheimer', 'paliativos'], illnesses: ['alzheimer', 'oncologia'], training: ['tcae', 'especializados'], jornadas: ['noches', 'parcial'], days: [0, 1, 2, 3, 4, 5, 6], rating: 5, reviews: 48, trusted: true, drivingLicense: true, vehicle: true, about: 'Especializada en turnos de noche y acompañamiento hospitalario. Muy valorada por las familias.', highlights: ['Turnos de noche', 'Acompañamiento en hospital', 'Demencias'] },
+  { id: 'fatima-b', name: 'Fátima Benali', spanish: false, nationality: 'Marruecos', zone: 'Sanlúcar', experienceYears: 5, careTypes: ['mayores', 'dependencia'], training: ['sociosanitaria'], jornadas: ['completa', 'interna'], days: [0, 1, 2, 3, 4, 5], languages: ['Español', 'Árabe', 'Francés'], rating: 4.6, reviews: 11, about: 'Cocina casera adaptada y mucha paciencia. Experiencia como interna en Sanlúcar.', highlights: ['Cocina adaptada', 'Cuidadora interna'] },
+  { id: 'lucia-h', name: 'Lucía Herrera', zone: 'Chipiona', experienceYears: 1, careTypes: ['mayores', 'ninos'], training: ['primeros', 'otra'], otherTraining: 'Grado en Educación Social', jornadas: ['horas', 'parcial'], days: [0, 1, 2, 3, 4], rating: 4.5, reviews: 3, docsStatus: 'en_revision', about: 'Educadora social. Acompañamiento, ocio y estimulación para mayores y niños.', highlights: ['Ocio y actividades', 'Estimulación'] },
+  { id: 'rosa-g', name: 'Rosa Gil', zone: 'Arcos', experienceYears: 20, careTypes: ['mayores', 'dependencia', 'movilidad'], training: ['dependientes'], jornadas: ['interna'], days: [0, 1, 2, 3, 4, 5, 6], rating: 4.9, reviews: 39, trusted: true, about: 'Veinte años cuidando a personas mayores en la sierra. Persona tranquila y de total confianza.', highlights: ['Cuidadora interna', 'Larga experiencia'] },
+  { id: 'daniela-r', name: 'Daniela Ríos', spanish: false, nationality: 'Venezuela', zone: 'San Fernando', experienceYears: 7, careTypes: ['mayores', 'postoperatorio'], illnesses: ['diabetes', 'corazon'], training: ['tcae'], jornadas: ['parcial', 'noches'], days: [0, 1, 2, 3, 4], rating: 4.7, reviews: 21, drivingLicense: true, about: 'Enfermera de formación en mi país, homologando el título. Control de constantes y curas sencillas.', highlights: ['Control de glucosa', 'Recuperación postoperatoria'] },
+  { id: 'elena-m', name: 'Elena Martín', zone: 'El Puerto', experienceYears: 3, careTypes: ['mayores'], training: ['sociosanitaria'], jornadas: ['parcial', 'horas'], days: [0, 1, 2, 3, 4], rating: 4.4, reviews: 8, about: 'Alegre y paciente. Me adapto a las rutinas de cada casa.', highlights: ['Compañía y paseos'] },
+  { id: 'andreea-p', name: 'Andreea Popescu', spanish: false, nationality: 'Rumanía', zone: 'Chiclana', experienceYears: 11, careTypes: ['mayores', 'dependencia', 'alzheimer'], illnesses: ['alzheimer', 'parkinson'], training: ['especializados', 'dependientes'], jornadas: ['interna', 'completa'], days: [0, 1, 2, 3, 4, 5, 6], languages: ['Español', 'Rumano', 'Italiano'], rating: 4.8, reviews: 30, trusted: true, about: 'Once años cuidando a personas con Alzheimer y Parkinson. Mucha paciencia y buen humor.', highlights: ['Alzheimer y Parkinson', 'Cuidadora interna'] },
+  { id: 'nuria-t', name: 'Nuria Torres', zone: 'Cádiz', experienceYears: 2, careTypes: ['discapacidad', 'ninos'], training: ['otra'], otherTraining: 'Técnico en Integración Social', jornadas: ['parcial', 'horas'], days: [0, 1, 2, 3, 4], rating: 4.6, reviews: 5, about: 'Técnico en Integración Social. Apoyo a niños y adultos con discapacidad.', highlights: ['Discapacidad', 'Apoyo escolar'] },
+  { id: 'carolina-a', name: 'Carolina Acosta', spanish: false, nationality: 'Honduras', zone: 'Jerez', experienceYears: 4, careTypes: ['mayores', 'dependencia'], training: ['sociosanitaria'], jornadas: ['completa', 'interna'], days: [0, 1, 2, 3, 4, 5], rating: 4.5, reviews: 10, docsStatus: 'en_revision', about: 'Trabajadora y cariñosa, con experiencia como interna en Jerez.', highlights: ['Cuidadora interna'] },
+  { id: 'teresa-b', name: 'Teresa Blanco', zone: 'Puerto Real', experienceYears: 6, careTypes: ['mayores', 'movilidad'], training: ['primeros', 'sociosanitaria'], jornadas: ['finde', 'noches'], days: [4, 5, 6], rating: 4.6, reviews: 17, drivingLicense: true, vehicle: true, about: 'Fines de semana y noches. Tengo coche propio para acompañar a citas.', highlights: ['Coche propio', 'Fines de semana'] },
+  { id: 'inmaculada-r', name: 'Inmaculada Romero', zone: 'Sanlúcar', experienceYears: 9, careTypes: ['mayores', 'dependencia', 'paliativos'], training: ['tcae'], jornadas: ['completa'], days: [0, 1, 2, 3, 4], rating: 4.7, reviews: 24, about: 'Auxiliar de enfermería con experiencia en ayuda a domicilio municipal.', highlights: ['Ayuda a domicilio', 'Cuidados paliativos'] },
+  { id: 'patricia-o', name: 'Patricia Ortega', spanish: false, nationality: 'Argentina', zone: 'Rota', experienceYears: 5, careTypes: ['mayores', 'alzheimer'], training: ['especializados'], jornadas: ['parcial'], days: [0, 1, 2, 3, 4], languages: ['Español', 'Inglés'], rating: 4.6, reviews: 12, about: 'Psicóloga de formación. Acompañamiento emocional y estimulación cognitiva.', highlights: ['Estimulación cognitiva', 'Acompañamiento emocional'] },
+  { id: 'beatriz-s', name: 'Beatriz Serrano', zone: 'Chiclana', experienceYears: 3, careTypes: ['mayores'], training: ['primeros'], jornadas: ['horas'], days: [1, 3], rating: 4.3, reviews: 4, available: false, about: 'Disponible por horas en Chiclana.', highlights: ['Por horas'] },
+  { id: 'sonia-f', name: 'Sonia Flores', zone: 'Jerez', experienceYears: 8, careTypes: ['mayores', 'dependencia'], training: ['tcae'], jornadas: ['completa'], days: [0, 1, 2, 3, 4], rating: 4.8, reviews: 22, available: false, about: 'Actualmente trabajando. Auxiliar de enfermería con ocho años de experiencia.', highlights: ['Auxiliar de enfermería'] },
+  { id: 'marta-v', name: 'Marta Vidal', zone: 'Arcos', experienceYears: 1, careTypes: ['mayores'], training: ['dependientes'], jornadas: ['parcial', 'horas'], days: [0, 1, 2, 3, 4], rating: 4.5, reviews: 2, about: 'Recién formada en atención a personas dependientes, con muchas ganas de aprender.', highlights: ['Compañía'] },
+]
+
+export const seedCaregivers = (): Caregiver[] => seeds.map(cg)
