@@ -27,15 +27,11 @@ jobs:
 
       - run: npm ci
 
-      - name: Configure Pages
-        id: pages
-        uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v5
 
+      # La base /mtc-marketplace/ se define en vite.config.ts
       - name: Build
         run: npm run build
-        env:
-          # Ruta base del sitio, p. ej. /mtc-marketplace/
-          BASE_PATH: ${{ steps.pages.outputs.base_path }}/
 
       # SPA: GitHub Pages sirve 404.html para rutas profundas (/buscar, /mensajes/…)
       - run: cp dist/index.html dist/404.html

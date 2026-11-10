@@ -4,6 +4,8 @@ Demo funcional del marketplace de cuidado de personas de **María te Cuida**, co
 `Maria_te_Cuida.pptx`, la hoja de ruta y el mapa conceptual. Todos los datos son ficticios y se guardan
 en el `localStorage` del navegador (no hay backend).
 
+**Demo publicada:** https://chillaso.github.io/mtc-marketplace/ (se despliega automáticamente con cada push a `main`).
+
 ## Arrancar
 
 ```bash

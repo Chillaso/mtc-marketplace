@@ -2,6 +2,7 @@
   "name": "frt-marketplace-web",
   "private": true,
   "version": "0.0.0",
+  "homepage": "https://chillaso.github.io/mtc-marketplace/",
   "type": "module",
   "scripts": {
     "dev": "vite",
