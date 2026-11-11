@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import {
-  ArrowLeft,
   BriefcaseBusiness,
   CalendarDays,
   Check,
   ChevronRight,
+  CircleAlert,
   Clock,
   Eye,
   FileText,
@@ -20,14 +20,14 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   User,
-  UserRoundCheck,
   X,
   type LucideIcon,
 } from 'lucide-react'
 import { Container } from '../components/Layout'
-import { Avatar, Button, DocStatusChip, EmptyState, IconBubble, InfoNote, LoginRequired, Toggle } from '../components/ui'
+import { Avatar, BackLink, Button, DocStatusChip, EmptyState, ErrorSummary, IconBubble, InfoNote, LoginRequired, Modal } from '../components/ui'
 import { CaregiverProfileView } from '../components/CaregiverProfileView'
 import {
+  AvailabilitySegment,
   FormacionFields,
   PreferenciasFields,
   StepCuidados,
@@ -72,21 +72,18 @@ function sectionStatus(id: SectionId, c: Caregiver): 'ok' | 'review' | 'todo' {
 }
 
 function StatusPill({ s }: { s: 'ok' | 'review' | 'todo' }) {
-  if (s === 'ok')
-    return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-3 py-1 text-sm font-semibold text-brand-900">
-        <Check className="size-4 text-brand-700" strokeWidth={3} />
-        Completado
-      </span>
-    )
-  if (s === 'review')
-    return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-600">
-        <Clock className="size-4" />
-        En revisión
-      </span>
-    )
-  return <span className="inline-flex items-center rounded-full bg-amber-soft px-3 py-1 text-sm font-semibold text-amber-ink">Pendiente</span>
+  const map = {
+    ok: ['bg-ok-soft text-ok-ink', 'Completado', Check],
+    review: ['bg-off-soft text-off-ink', 'En revisión', Clock],
+    todo: ['bg-warn-soft text-warn-ink', 'Pendiente', CircleAlert],
+  } as const
+  const [cls, label, Icon] = map[s]
+  return (
+    <span className={cx('inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold', cls)}>
+      <Icon aria-hidden className="size-4" strokeWidth={2.5} />
+      {label}
+    </span>
+  )
 }
 
 function RequireCaregiver({ children }: { children: (c: Caregiver) => React.ReactNode }) {
@@ -109,28 +106,27 @@ function Dashboard({ c }: { c: Caregiver }) {
 
   return (
     <Container className="max-w-5xl py-6 sm:py-8">
-      <section className="flex flex-col gap-5 rounded-3xl border border-brand-100 bg-gradient-to-r from-brand-50 to-white p-5 sm:flex-row sm:items-center sm:p-6">
-        <div className="flex flex-1 items-center gap-4">
-          <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-700 sm:size-20">
-            <UserRoundCheck className="size-9" strokeWidth={1.6} />
-          </span>
-          <div>
+      <section className="card overflow-hidden">
+        <div className="flex items-center gap-4 p-5 sm:p-7">
+          <Avatar name={c.name} photo={c.photo} size={72} />
+          <div className="min-w-0">
             <h1 className="text-3xl font-bold sm:text-4xl">Hola, {me.greetingName}</h1>
-            <p className="mt-1 text-[17px] text-ink-soft">Aquí tienes tu perfil y toda la información de tu cuenta.</p>
+            <p className="mt-1 text-lg text-ink-soft">Aquí tienes tu perfil y toda la información de tu cuenta.</p>
           </div>
         </div>
-        <div className="sm:text-right">
-          <div className="inline-flex items-center gap-4 rounded-full border border-line bg-white py-2 pr-2 pl-5 shadow-card">
-            <span className={cx('size-3 rounded-full', c.available ? 'bg-emerald-600' : 'bg-slate-400')} />
-            <span className={cx('text-lg font-semibold', c.available ? 'text-emerald-800' : 'text-slate-600')}>{c.available ? 'Disponible' : 'No disponible'}</span>
-            <Toggle checked={c.available} onChange={(v) => setAvailability(c.id, v)} label="Cambiar disponibilidad" />
+        <div className={cx('flex flex-col gap-4 border-t px-5 py-5 sm:px-7 md:flex-row md:items-center', c.available ? 'border-ok-soft bg-ok-soft/60' : 'border-line bg-sunken')}>
+          <div className="flex-1">
+            <h2 className="text-xl font-semibold">¿Estás disponible para nuevas familias?</h2>
+            <p className="mt-1 text-ink-soft" aria-live="polite">
+              {c.available ? 'Sí. Apareces en las búsquedas y las familias pueden enviarte solicitudes.' : 'No. Ahora no apareces en las búsquedas. Puedes volver a activarte cuando quieras.'}
+            </p>
           </div>
-          <p className="mt-2 text-xs text-muted">Puedes cambiar tu disponibilidad en cualquier momento.</p>
+          <AvailabilitySegment size="lg" value={c.available} onChange={(v) => setAvailability(c.id, v)} />
         </div>
       </section>
 
       {pending.length > 0 && (
-        <Link to="/cuidadora/solicitudes" className="mt-5 flex items-center gap-4 rounded-2xl bg-rosa-50 p-4 ring-1 ring-rosa-100 transition hover:ring-rosa-300 sm:p-5">
+        <Link to="/cuidadora/solicitudes" className="pressable mt-5 flex items-center gap-4 rounded-[20px] border-2 border-care-line bg-care-subtle p-4 hover:bg-care-soft sm:p-5">
           <IconBubble icon={Handshake} tone="rosa" />
           <div className="flex-1">
             <div className="text-lg font-semibold">
@@ -138,69 +134,75 @@ function Dashboard({ c }: { c: Caregiver }) {
             </div>
             <div className="text-ink-soft">Revisa qué necesita la familia y decide si quieres aceptarla.</div>
           </div>
-          <ChevronRight className="size-6 text-rosa-600" />
+          <ChevronRight aria-hidden className="size-6 text-care" strokeWidth={2.25} />
         </Link>
       )}
 
-      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+      <h2 className="mt-10 text-2xl font-bold">Tu perfil</h2>
+      <p className="mt-1 text-ink-soft">Mantén tu información al día para recibir más oportunidades de trabajo.</p>
+      <ul className="mt-5 grid gap-4 sm:grid-cols-2">
         {(Object.keys(SECTIONS) as SectionId[]).map((id) => {
           const s = SECTIONS[id]
           return (
-            <Link key={id} to={`/cuidadora/perfil/${id}`} className="card group flex flex-col gap-4 p-5 transition hover:border-brand-200 hover:shadow-pop">
-              <div className="flex items-start gap-4">
-                <IconBubble icon={s.icon} size="lg" />
-                <div className="flex-1">
-                  <h2 className="text-xl font-semibold">{s.title}</h2>
-                  <p className="text-ink-soft">{s.subtitle}</p>
+            <li key={id}>
+              <Link to={`/cuidadora/perfil/${id}`} className="card pressable group flex h-full flex-col gap-4 p-5 hover:shadow-card-hover">
+                <div className="flex items-start gap-4">
+                  <IconBubble icon={s.icon} size="lg" />
+                  <div className="flex-1">
+                    <h3 className="text-xl font-semibold">{s.title}</h3>
+                    <p className="text-ink-soft">{s.subtitle}</p>
+                  </div>
                 </div>
-                <ChevronRight className="mt-1 size-5 text-ink transition group-hover:translate-x-0.5" />
-              </div>
-              <div className="flex items-center justify-between">
-                <StatusPill s={sectionStatus(id, c)} />
-                <span className="inline-flex h-9 items-center gap-1 rounded-full border border-brand-200 px-4 text-sm font-semibold text-brand-800 group-hover:bg-brand-50">
-                  Ver y editar <ChevronRight className="size-4" />
-                </span>
-              </div>
-            </Link>
+                <div className="mt-auto flex flex-wrap items-center justify-between gap-2">
+                  <StatusPill s={sectionStatus(id, c)} />
+                  <span className="inline-flex items-center gap-1 font-semibold text-accent">
+                    Ver y editar
+                    <ChevronRight aria-hidden className="size-5 motion-safe:transition-[translate] motion-safe:duration-150 group-hover:translate-x-0.5" strokeWidth={2.25} />
+                  </span>
+                </div>
+              </Link>
+            </li>
           )
         })}
+      </ul>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <Link to="/mensajes" className="card pressable flex items-center gap-4 p-5 hover:shadow-card-hover">
+          <IconBubble icon={Mail} size="lg" />
+          <div className="flex-1">
+            <h2 className="text-xl font-semibold">Mensajes</h2>
+            <p className="text-ink-soft">
+              {me.unreadMessages > 0 ? `${me.unreadMessages} ${me.unreadMessages === 1 ? 'mensaje sin leer' : 'mensajes sin leer'}` : 'Tus conversaciones con familias.'}
+            </p>
+          </div>
+          <ChevronRight aria-hidden className="size-5 text-ink-soft" />
+        </Link>
+        <Link to="/cuidadora/perfil" className="card pressable flex items-center gap-4 p-5 hover:shadow-card-hover">
+          <IconBubble icon={Eye} size="lg" tone="rosa" />
+          <div className="flex-1">
+            <h2 className="text-xl font-semibold">Mi perfil público</h2>
+            <p className="text-ink-soft">Así te ven las familias.</p>
+          </div>
+          <ChevronRight aria-hidden className="size-5 text-ink-soft" />
+        </Link>
       </div>
 
-      <Link to="/mensajes" className="card mt-4 flex items-center gap-4 p-5 transition hover:shadow-pop">
-        <IconBubble icon={Mail} size="lg" />
-        <div className="flex-1">
-          <h2 className="text-xl font-semibold">Mensajes</h2>
-          <p className="text-ink-soft">Contacta con familias y consulta tus conversaciones.</p>
-        </div>
-        {me.unreadMessages > 0 && <span className="flex size-8 items-center justify-center rounded-full bg-rosa-500 font-bold text-white">{me.unreadMessages}</span>}
-        <ChevronRight className="size-5" />
-      </Link>
-
-      <section className="mt-4 flex flex-col gap-4 rounded-2xl border border-brand-100 bg-brand-50 p-5 sm:flex-row sm:items-center">
-        <IconBubble icon={ShieldCheck} size="lg" />
-        <div className="flex-1">
-          <h2 className="text-lg font-semibold">Tu perfil, siempre actualizado</h2>
-          <p className="text-ink-soft">Mantén tu información al día para recibir más oportunidades de trabajo.</p>
-        </div>
-        <Button variant="outline" to="/cuidadora/perfil" iconRight={ChevronRight}>
-          Ver mi perfil público
-        </Button>
-      </section>
-
-      <section className="card mt-4 p-5">
-        <div className="flex items-center gap-3">
-          <CalendarDays className="size-7 text-brand-700" />
-          <h2 className="flex-1 text-xl font-semibold">Tu actividad reciente</h2>
-        </div>
-        <ul className="mt-3 divide-y divide-line">
+      <section className="card mt-4 p-5 sm:p-6">
+        <h2 className="flex items-center gap-3 text-xl font-semibold">
+          <CalendarDays aria-hidden className="size-6 text-accent-icon" strokeWidth={2} />
+          Tu actividad reciente
+        </h2>
+        <ol className="mt-4">
           {activity.map((a) => (
-            <li key={a.id} className="grid grid-cols-[110px_16px_1fr] items-center gap-3 py-3 text-[15px] sm:grid-cols-[140px_16px_1fr]">
-              <span className="text-sm text-muted">{fmtWhen(a.at)}</span>
-              <span className={cx('size-2.5 rounded-full', a.highlight ? 'bg-brand-600' : 'bg-slate-300')} />
-              <span className={a.highlight ? 'text-brand-900' : 'text-ink-soft'}>{a.text}</span>
+            <li key={a.id} className="relative flex gap-4 pb-4 ps-1 last:pb-0">
+              <span aria-hidden className={cx('relative z-10 mt-1.5 size-3 shrink-0 rounded-full ring-4 ring-surface', a.highlight ? 'bg-accent' : 'bg-line')} />
+              <span className="min-w-0">
+                <span className={cx('block', a.highlight ? 'font-medium text-ink' : 'text-ink-soft')}>{a.text}</span>
+                <span className="text-sm text-muted">{fmtWhen(a.at)}</span>
+              </span>
             </li>
           ))}
-        </ul>
+        </ol>
       </section>
     </Container>
   )
@@ -213,8 +215,11 @@ export function CaregiverOwnProfile() {
     <RequireCaregiver>
       {(c) => (
         <Container className="max-w-6xl py-6 sm:py-8">
+          <div className="mb-4">
+            <BackLink to="/cuidadora">Volver a mi panel</BackLink>
+          </div>
           <InfoNote icon={Eye}>
-            <strong>Así ven tu perfil las familias.</strong> Tu correo y teléfono no se muestran: solo se comparten cuando aceptas una solicitud.
+            <strong>Así ven tu perfil las familias.</strong> Tu correo y tu teléfono no se muestran: solo se comparten cuando aceptas una solicitud.
           </InfoNote>
           <div className="mt-5">
             <CaregiverProfileView
@@ -222,9 +227,15 @@ export function CaregiverOwnProfile() {
               fullName
               actions={
                 <>
-                  <Button variant="outline" icon={Pencil} to="/cuidadora/perfil/datos">Editar mis datos</Button>
-                  <Button variant="outline" icon={Pencil} to="/cuidadora/perfil/experiencia">Editar experiencia</Button>
-                  <Button variant="outline" icon={Pencil} to="/cuidadora/perfil/preferencias">Editar preferencias</Button>
+                  <Button variant="outline" icon={Pencil} to="/cuidadora/perfil/datos">
+                    Editar mis datos
+                  </Button>
+                  <Button variant="outline" icon={Pencil} to="/cuidadora/perfil/experiencia">
+                    Editar experiencia
+                  </Button>
+                  <Button variant="outline" icon={Pencil} to="/cuidadora/perfil/preferencias">
+                    Editar preferencias
+                  </Button>
                 </>
               }
             />
@@ -248,14 +259,19 @@ function SectionEditor({ c, id }: { c: Caregiver; id: SectionId }) {
   const sec = SECTIONS[id]
   const [d, setD] = useState<CaregiverDraft>({ ...c, password: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const summaryRef = useRef<HTMLDivElement>(null)
   const set = (patch: Partial<CaregiverDraft>) => {
     setD((p) => ({ ...p, ...patch }))
     setErrors({})
   }
-  const save = () => {
+  const save = (ev: React.FormEvent) => {
+    ev.preventDefault()
     const e = sec.step ? validateStep(sec.step, d, true) : {}
     setErrors(e)
-    if (Object.keys(e).length) return
+    if (Object.keys(e).length) {
+      requestAnimationFrame(() => summaryRef.current?.focus())
+      return
+    }
     const { password: _pw, ...rest } = d
     void _pw
     const patch: Partial<Caregiver> = { ...rest }
@@ -269,26 +285,37 @@ function SectionEditor({ c, id }: { c: Caregiver; id: SectionId }) {
   }
   return (
     <Container className="max-w-3xl py-6 sm:py-8">
-      <Link to="/cuidadora" className="mb-6 flex items-center gap-3 rounded-full bg-gradient-to-r from-brand-50 to-brand-100 px-5 py-3 font-semibold text-ink">
-        <ArrowLeft className="size-5" /> Volver a mi cuenta
-      </Link>
+      <div className="mb-5">
+        <BackLink to="/cuidadora">Volver a mi panel</BackLink>
+      </div>
       <StepHeader icon={sec.icon} title={sec.title} subtitle={sec.subtitle} />
       {id === 'documentacion' && (
-        <div className="mb-6 space-y-3">
+        <div className="mb-7 space-y-3">
           <InfoNote icon={ShieldCheck}>
             La revisión de documentos es distinta del distintivo <strong>«Cuidadora de confianza»</strong>, que se concede a quienes ya han trabajado con familias a través de la plataforma y han sido valoradas positivamente.
           </InfoNote>
-          <div className="flex items-center gap-3 rounded-2xl border border-line p-4">
+          <div className="card flex flex-wrap items-center gap-3 p-4">
             <span className="flex-1 font-semibold">Estado de tu documentación</span>
             <DocStatusChip status={c.docsStatus} />
           </div>
         </div>
       )}
-      <sec.Comp d={d} set={set} errors={errors} editing />
-      <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row">
-        <Button variant="outline" size="lg" to="/cuidadora">Cancelar</Button>
-        <Button size="lg" className="sm:flex-1" icon={Save} onClick={save}>Guardar cambios</Button>
-      </div>
+      <form onSubmit={save} noValidate>
+        {Object.keys(errors).length > 0 && (
+          <div className="mb-6">
+            <ErrorSummary ref={summaryRef} errors={errors} />
+          </div>
+        )}
+        <sec.Comp d={d} set={set} errors={errors} editing />
+        <div className="mt-8 flex flex-col gap-3 border-t border-line pt-6 sm:flex-row">
+          <Button type="submit" size="lg" className="sm:flex-1" icon={Save}>
+            Guardar cambios
+          </Button>
+          <Button variant="ghost" size="lg" to="/cuidadora">
+            Cancelar
+          </Button>
+        </div>
+      </form>
     </Container>
   )
 }
@@ -305,6 +332,8 @@ function Requests({ c }: { c: Caregiver }) {
   const { state, respondRequest, toast } = useStore()
   const navigate = useNavigate()
   const [tab, setTab] = useState<'pendiente' | 'resto'>('pendiente')
+  const [rejecting, setRejecting] = useState<ContactRequest | null>(null)
+  const rejectingFam = rejecting && state.families.find((f) => f.id === rejecting.familyId)
   const mine = state.requests.filter((r) => r.caregiverId === c.id && r.status !== 'cancelada')
   const list = mine.filter((r) => (tab === 'pendiente' ? r.status === 'pendiente' : r.status !== 'pendiente'))
   const pendingCount = mine.filter((r) => r.status === 'pendiente').length
@@ -312,24 +341,30 @@ function Requests({ c }: { c: Caregiver }) {
   return (
     <Container className="max-w-4xl py-6 sm:py-8">
       <h1 className="text-3xl font-bold sm:text-4xl">Solicitudes de contacto</h1>
-      <p className="mt-1 text-[17px] text-ink-soft">Las familias te cuentan qué necesitan. Si aceptas, se confirma el match y se abre el chat privado.</p>
-      <div className="mt-6 inline-flex rounded-full bg-brand-50 p-1">
+      <p className="mt-2 max-w-[60ch] text-lg text-ink-soft">Las familias te cuentan qué necesitan. Si aceptas, se confirma el match y se abre el chat privado.</p>
+      <div role="group" aria-label="Mostrar solicitudes" className="mt-6 inline-grid grid-cols-2 gap-1 rounded-full bg-sunken p-1">
         {(
           [
             ['pendiente', `Nuevas (${pendingCount})`],
             ['resto', 'Respondidas'],
           ] as const
         ).map(([k, label]) => (
-          <button key={k} type="button" onClick={() => setTab(k)} className={cx('rounded-full px-5 py-2 font-semibold transition', tab === k ? 'bg-white text-brand-900 shadow-card' : 'text-ink-soft')}>
+          <button
+            key={k}
+            type="button"
+            aria-pressed={tab === k}
+            onClick={() => setTab(k)}
+            className={cx('min-h-12 rounded-full px-5 font-semibold transition-[background-color,color,box-shadow] duration-150', tab === k ? 'bg-surface text-ink shadow-card' : 'text-ink-soft hover:text-ink')}
+          >
             {label}
           </button>
         ))}
       </div>
-      <div className="mt-5 space-y-4">
+      <div className="mt-6 space-y-4">
         {list.length === 0 && (
           <div className="card">
             <EmptyState icon={Handshake} title={tab === 'pendiente' ? 'No tienes solicitudes nuevas' : 'Aún no has respondido solicitudes'}>
-              {c.available ? 'Cuando una familia quiera contactar contigo, la verás aquí.' : 'Ahora mismo apareces como «No disponible». Actívate para recibir nuevas solicitudes.'}
+              {c.available ? 'Cuando una familia quiera contactar contigo, la verás aquí.' : 'Ahora mismo apareces como «No disponible». Actívate en tu panel para recibir nuevas solicitudes.'}
             </EmptyState>
           </div>
         )}
@@ -338,53 +373,95 @@ function Requests({ c }: { c: Caregiver }) {
           return (
             <article key={r.id} className="card p-5 sm:p-6">
               <div className="flex flex-wrap items-center gap-3">
-                <Avatar name={fam.name.replace('Familia ', '')} size={48} />
+                <Avatar name={fam.name.replace('Familia ', '')} size={52} />
                 <div className="flex-1">
-                  <h2 className="text-lg font-semibold">{fam.name}</h2>
-                  <div className="text-sm text-muted">Recibida: {fmtWhen(r.createdAt)}</div>
+                  <h2 className="text-xl font-semibold">{fam.name}</h2>
+                  <div className="text-sm text-muted">Recibida {fmtWhen(r.createdAt)}</div>
                 </div>
-                {r.status === 'aceptada' && <span className="rounded-full bg-brand-100 px-3 py-1 text-sm font-semibold text-brand-900">Match confirmado</span>}
-                {r.status === 'rechazada' && <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-600">Rechazada</span>}
+                {r.status === 'aceptada' && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-ok-soft px-3 py-1 text-sm font-semibold text-ok-ink">
+                    <Check aria-hidden className="size-4" strokeWidth={2.5} />
+                    Match confirmado
+                  </span>
+                )}
+                {r.status === 'rechazada' && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-off-soft px-3 py-1 text-sm font-semibold text-off-ink">
+                    <X aria-hidden className="size-4" strokeWidth={2.5} />
+                    Rechazada
+                  </span>
+                )}
               </div>
-              <p className="mt-4 rounded-2xl bg-brand-50/60 p-4 text-[17px] leading-relaxed">“{r.need}”</p>
-              <div className="mt-4 grid gap-2 text-[15px] text-ink-soft sm:grid-cols-2">
-                <span className="flex items-center gap-2"><User className="size-5 text-brand-600" />{labelOf(PERSON_TYPES, r.personType)}</span>
-                <span className="flex items-center gap-2"><MapPin className="size-5 text-brand-600" />{r.zone}</span>
-                <span className="flex items-center gap-2"><CalendarDays className="size-5 text-brand-600" />Inicio: {startText(r)}</span>
-                <span className="flex items-center gap-2"><Clock className="size-5 text-brand-600" />{labelOf(JORNADAS, r.jornada)}</span>
-              </div>
-              <div className="mt-5 flex flex-wrap gap-3">
-                {r.status === 'pendiente' ? (
-                  <>
-                    <Button
-                      icon={Check}
-                      onClick={() => {
-                        respondRequest(r.id, true)
-                        toast('¡Match confirmado! Ya podéis hablar por el chat.')
-                        navigate(`/mensajes/${r.id}`)
-                      }}
-                    >
-                      Aceptar solicitud
+              <blockquote className="mt-4 rounded-2xl bg-sunken p-4 leading-relaxed">«{r.need}»</blockquote>
+              <ul className="mt-4 grid gap-2 text-ink-soft sm:grid-cols-2">
+                <li className="flex items-center gap-2.5">
+                  <User aria-hidden className="size-5 text-accent-icon" strokeWidth={2} />
+                  {labelOf(PERSON_TYPES, r.personType)}
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <MapPin aria-hidden className="size-5 text-accent-icon" strokeWidth={2} />
+                  {r.zone}
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <CalendarDays aria-hidden className="size-5 text-accent-icon" strokeWidth={2} />
+                  Inicio: {startText(r)}
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <Clock aria-hidden className="size-5 text-accent-icon" strokeWidth={2} />
+                  {labelOf(JORNADAS, r.jornada)}
+                </li>
+              </ul>
+              {r.status !== 'rechazada' && (
+                <div className="mt-5 flex flex-wrap gap-3 border-t border-line pt-5">
+                  {r.status === 'pendiente' ? (
+                    <>
+                      <Button
+                        icon={Check}
+                        onClick={() => {
+                          respondRequest(r.id, true)
+                          toast('Match confirmado. Ya podéis hablar por el chat.')
+                          navigate(`/mensajes/${r.id}`)
+                        }}
+                      >
+                        Aceptar solicitud
+                      </Button>
+                      <Button
+                        variant="danger"
+                        icon={X}
+                        onClick={() => setRejecting(r)}
+                      >
+                        Rechazar
+                      </Button>
+                    </>
+                  ) : (
+                    <Button variant="outline" icon={MessageCircleMore} to={`/mensajes/${r.id}`}>
+                      Ir a la conversación
                     </Button>
-                    <Button
-                      variant="danger"
-                      icon={X}
-                      onClick={() => {
-                        respondRequest(r.id, false)
-                        toast('Has rechazado la solicitud. La familia recibirá un aviso.', 'info')
-                      }}
-                    >
-                      Rechazar
-                    </Button>
-                  </>
-                ) : r.status === 'aceptada' ? (
-                  <Button variant="outline" icon={MessageCircleMore} to={`/mensajes/${r.id}`}>Ir a la conversación</Button>
-                ) : null}
-              </div>
+                  )}
+                </div>
+              )}
             </article>
           )
         })}
       </div>
+      <Modal open={!!rejecting} onClose={() => setRejecting(null)} title={`¿Rechazar la solicitud de ${rejectingFam?.name ?? 'la familia'}?`}>
+        <p className="text-ink-soft">La familia recibirá un aviso de que no estás disponible. No se puede deshacer.</p>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Button
+            variant="danger"
+            icon={X}
+            onClick={() => {
+              if (rejecting) respondRequest(rejecting.id, false)
+              setRejecting(null)
+              toast('Has rechazado la solicitud. La familia recibirá un aviso.', 'info')
+            }}
+          >
+            Rechazar solicitud
+          </Button>
+          <Button variant="ghost" onClick={() => setRejecting(null)}>
+            Mantener solicitud
+          </Button>
+        </div>
+      </Modal>
     </Container>
   )
 }

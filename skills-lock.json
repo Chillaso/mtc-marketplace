@@ -1,0 +1,53 @@
+{
+  "version": 2,
+  "skills": {
+    "accessibility": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "github",
+      "skillPath": "skills/accessibility/SKILL.md",
+      "computedHash": "c668809f5df57feb87cc06f1bc37fb340d1d92e26bacb6edbeab9258d22e76a5"
+    },
+    "better-accessibility": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-accessibility/SKILL.md",
+      "computedHash": "b08dea072cfa1a31ec93a7f50849780d09b5a36aa82ce50a3a3f06408bc679f1"
+    },
+    "better-colors": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-colors/SKILL.md",
+      "computedHash": "6c40244bd9bc5ed1ddb4357ddc1a4787d0f3d8743928627979c4d3edda98f665"
+    },
+    "better-interface": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-interface/SKILL.md",
+      "computedHash": "37ae068dc11f7548c3064848cb6d97f4e4626e689ad374c192ddc05d11641c04"
+    },
+    "better-layout": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-layout/SKILL.md",
+      "computedHash": "1c42c9853d688e741b9ee520040171e2eb40e6cbab2302cd8bd351b447a6d4c7"
+    },
+    "better-typography": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-typography/SKILL.md",
+      "computedHash": "7c81bcecb6b765269959cc06c3bd1af2719df7594bbda02817d1b284f4991812"
+    },
+    "better-ui": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-ui/SKILL.md",
+      "computedHash": "36417d09a0d91fb8c8cbbbeeb14f0ac0c0d4399342d80bcec02c8c446ebadce3"
+    },
+    "better-writing": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-writing/SKILL.md",
+      "computedHash": "1a0f637280dfd4d2a3245ab6a0dad4b48b22a4a2ced64915eb51876012cf46f0"
+    }
+  }
+}

@@ -1,10 +1,12 @@
-import { useRef, type ReactNode } from 'react'
+import { useId, useRef, type ReactNode } from 'react'
 import {
   Accessibility,
   BedDouble,
   BriefcaseBusiness,
   CalendarDays,
   Car,
+  CirclePause,
+  CircleCheck,
   CookingPot,
   FileCheck2,
   FileText,
@@ -27,7 +29,7 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react'
-import { Accordion, Checkbox, Chip, DaysRow, DocStatusChip, Field, IconInput, InfoNote, RadioCard, Select, Textarea } from './ui'
+import { Accordion, Checkbox, Chip, DaysRow, DocStatusChip, Field, IconInput, InfoNote, Input, RadioCard, Select, Textarea } from './ui'
 import { PasswordInput } from '../pages/Auth'
 import { CARE_TYPES, EXPERIENCE_RANGES, ILLNESSES, JORNADAS, LANGUAGES, NATIONALITIES, TASKS, TRAINING, WORKPLACES, ZONES } from '../data/catalog'
 import type { UploadedDoc } from '../data/types'
@@ -78,18 +80,21 @@ export const emptyDraft = (): CaregiverDraft => ({
 
 const toggle = <T,>(arr: T[], v: T) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v])
 
-export const yearsToRange = (y: number) => (y < 0 ? '' : [...EXPERIENCE_RANGES].reverse().find((r) => y >= r.min)?.id ?? '0')
+export const yearsToRange = (y: number) => (y < 0 ? '' : ([...EXPERIENCE_RANGES].reverse().find((r) => y >= r.min)?.id ?? '0'))
 
 /* -------------------------------------------------------------------------- */
 
-export function StepHeader({ icon: Icon, title, subtitle }: { icon: LucideIcon; title: string; subtitle: string }) {
+export function StepHeader({ icon: Icon, title, subtitle, eyebrow }: { icon: LucideIcon; title: string; subtitle: string; eyebrow?: string }) {
   return (
-    <div className="mb-6">
-      <h1 className="flex items-center gap-3 text-[28px] leading-tight font-bold sm:text-4xl">
-        <Icon className="size-10 shrink-0 text-brand-800 sm:size-12" strokeWidth={1.6} />
-        {title}
-      </h1>
-      <p className="mt-2 text-[17px] text-ink-soft">{subtitle}</p>
+    <div className="mb-7 flex items-start gap-4">
+      <span aria-hidden className="flex size-14 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent max-sm:hidden">
+        <Icon className="size-7" strokeWidth={1.75} />
+      </span>
+      <div className="min-w-0">
+        {eyebrow && <p className="mb-1 font-semibold text-accent">{eyebrow}</p>}
+        <h1 className="text-3xl font-bold sm:text-4xl">{title}</h1>
+        <p className="mt-2 max-w-[60ch] text-lg text-ink-soft">{subtitle}</p>
+      </div>
     </div>
   )
 }
@@ -98,20 +103,20 @@ export function StepHeader({ icon: Icon, title, subtitle }: { icon: LucideIcon; 
 
 export function StepDatos({ d, set, errors, editing }: StepProps) {
   return (
-    <div className="space-y-4">
-      <Field error={errors.name}>
-        <IconInput icon={User} placeholder="Nombre y apellidos*" autoComplete="name" value={d.name} invalid={!!errors.name} onChange={(e) => set({ name: e.target.value })} />
+    <div className="space-y-5">
+      <Field label="Nombre y apellidos" required error={errors.name}>
+        <IconInput icon={User} autoComplete="name" value={d.name} onChange={(e) => set({ name: e.target.value })} />
       </Field>
-      <Field error={errors.email}>
-        <IconInput icon={Mail} type="email" placeholder="Correo electrónico*" autoComplete="email" value={d.email} invalid={!!errors.email} onChange={(e) => set({ email: e.target.value })} />
+      <Field label="Correo electrónico" required error={errors.email}>
+        <IconInput icon={Mail} type="email" inputMode="email" autoComplete="email" placeholder="nombre@ejemplo.com" value={d.email} onChange={(e) => set({ email: e.target.value })} />
       </Field>
       {!editing && (
-        <Field error={errors.password}>
-          <PasswordInput value={d.password} onChange={(password) => set({ password })} invalid={!!errors.password} />
+        <Field label="Contraseña" required hint="Al menos 6 caracteres." error={errors.password}>
+          <PasswordInput value={d.password} onChange={(password) => set({ password })} />
         </Field>
       )}
-      <Field error={errors.phone}>
-        <IconInput icon={Phone} type="tel" placeholder="Teléfono*" autoComplete="tel" value={d.phone} invalid={!!errors.phone} onChange={(e) => set({ phone: e.target.value })} />
+      <Field label="Teléfono" required error={errors.phone}>
+        <IconInput icon={Phone} type="tel" inputMode="tel" autoComplete="tel" placeholder="600 000 000" value={d.phone} onChange={(e) => set({ phone: e.target.value })} />
       </Field>
     </div>
   )
@@ -119,24 +124,30 @@ export function StepDatos({ d, set, errors, editing }: StepProps) {
 
 /* ------------------------------- Paso 2 --------------------------------- */
 
-function FileUpload({ label, hint, kind, docs, onChange, error }: { label: string; hint: string; kind: string; docs: UploadedDoc[]; onChange: (docs: UploadedDoc[]) => void; error?: string }) {
+function FileUpload({ label, hint, kind, docs, onChange, error, required }: { label: string; hint: string; kind: string; docs: UploadedDoc[]; onChange: (docs: UploadedDoc[]) => void; error?: string; required?: boolean }) {
   const ref = useRef<HTMLInputElement>(null)
   const mine = docs.filter((x) => x.kind === kind)
   return (
-    <Field label={label} hint={hint} error={error}>
-      {mine.map((doc) => (
-        <div key={doc.id} className="mb-2 flex items-center gap-3 rounded-2xl border border-brand-200 bg-brand-50 px-4 py-3">
-          <FileCheck2 className="size-6 text-brand-700" />
-          <span className="min-w-0 flex-1 truncate font-medium">{doc.fileName}</span>
-          <DocStatusChip status={doc.status} />
-          <button type="button" onClick={() => onChange(docs.filter((x) => x.id !== doc.id))} aria-label={`Quitar ${doc.fileName}`} className="rounded-full p-1.5 text-muted hover:bg-white hover:text-rosa-600">
-            <Trash2 className="size-4" />
-          </button>
-        </div>
-      ))}
+    <Field group label={label} hint={hint} error={error} required={required}>
+      {mine.length > 0 && (
+        <ul className="mb-3 space-y-2">
+          {mine.map((doc) => (
+            <li key={doc.id} className="flex flex-wrap items-center gap-3 rounded-2xl bg-accent-subtle py-2 ps-4 pe-2">
+              <FileCheck2 aria-hidden className="size-6 shrink-0 text-accent" strokeWidth={2} />
+              <span className="min-w-0 flex-1 font-medium break-all">{doc.fileName}</span>
+              <DocStatusChip status={doc.status} />
+              <button type="button" onClick={() => onChange(docs.filter((x) => x.id !== doc.id))} aria-label={`Quitar ${doc.fileName}`} className="pressable flex size-11 items-center justify-center rounded-full text-ink-soft hover:bg-surface hover:text-care">
+                <Trash2 aria-hidden className="size-5" strokeWidth={2} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
       <input
         ref={ref}
         type="file"
+        tabIndex={-1}
+        aria-hidden
         accept=".pdf,.jpg,.jpeg,.png"
         className="sr-only"
         onChange={(e) => {
@@ -148,32 +159,38 @@ function FileUpload({ label, hint, kind, docs, onChange, error }: { label: strin
       <button
         type="button"
         onClick={() => ref.current?.click()}
-        className={cx('flex h-12 w-full items-center justify-center gap-2.5 rounded-full border-[1.5px] bg-white font-semibold text-brand-800 transition hover:bg-brand-50', error ? 'border-rosa-500' : 'border-brand-700')}
+        aria-invalid={error ? true : undefined}
+        className={cx(
+          'pressable flex min-h-14 w-full items-center justify-center gap-2.5 rounded-2xl border-2 border-dashed bg-surface font-semibold text-accent hover:bg-accent-subtle',
+          error ? 'border-care' : 'border-accent-line',
+        )}
       >
-        <Upload className="size-5" />
+        <Upload aria-hidden className="size-5" strokeWidth={2.25} />
         {mine.length ? 'Añadir otro archivo' : 'Subir archivo'}
+        <span className="sr-only">: {label}</span>
       </button>
     </Field>
   )
 }
 
 export function StepDocumentacion({ d, set, errors }: StepProps) {
+  const name = useId()
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="mb-3 text-xl font-semibold">¿Tienes nacionalidad española?</h2>
+    <div className="space-y-7">
+      <fieldset>
+        <legend className="mb-3 text-xl font-semibold">¿Tienes nacionalidad española?</legend>
         <div className="grid gap-3 sm:grid-cols-2">
-          <RadioCard checked={d.spanish} onChange={() => set({ spanish: true, nationality: '' })}>
+          <RadioCard name={name} checked={d.spanish} onChange={() => set({ spanish: true, nationality: '' })}>
             <span className="text-lg font-semibold">Sí</span>
           </RadioCard>
-          <RadioCard checked={!d.spanish} onChange={() => set({ spanish: false })}>
+          <RadioCard name={name} checked={!d.spanish} onChange={() => set({ spanish: false })}>
             <span className="text-lg font-semibold">No, soy extranjera</span>
           </RadioCard>
         </div>
-      </div>
+      </fieldset>
       {!d.spanish && (
-        <Field label="Tu nacionalidad" error={errors.nationality}>
-          <Select value={d.nationality ?? ''} onChange={(nationality) => set({ nationality })} options={NATIONALITIES} placeholder="Selecciona tu nacionalidad" invalid={!!errors.nationality} />
+        <Field label="Tu nacionalidad" required error={errors.nationality}>
+          <Select value={d.nationality ?? ''} onChange={(nationality) => set({ nationality })} options={NATIONALITIES} placeholder="Selecciona tu nacionalidad" />
         </Field>
       )}
       <FileUpload
@@ -183,15 +200,17 @@ export function StepDocumentacion({ d, set, errors }: StepProps) {
         docs={d.documents}
         onChange={(documents) => set({ documents })}
         error={errors.identity}
+        required
       />
       {!d.spanish && (
         <FileUpload
-          label="Documentación que acredita tu derecho a trabajar en España"
+          label="Documento que acredita tu derecho a trabajar en España"
           hint="Permiso de residencia y trabajo, TIE u otra autorización válida"
           kind="Permiso de residencia y trabajo"
           docs={d.documents}
           onChange={(documents) => set({ documents })}
           error={errors.permit}
+          required
         />
       )}
       <FileUpload label="Certificados de formación (opcional)" hint="Títulos, cursos o certificados que quieras aportar" kind="Certificado de formación" docs={d.documents} onChange={(documents) => set({ documents })} />
@@ -210,25 +229,27 @@ export function StepDeclaracion({ d, set, errors }: StepProps) {
   ]
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border border-line bg-white p-6 sm:p-8">
+      <div className="card p-6 sm:p-8">
         <h2 className="text-xl font-semibold">Declaro responsablemente que:</h2>
-        <ul className="mt-4 space-y-4">
-          {items.map((t) => (
-            <li key={t} className="flex gap-3 text-[17px] leading-snug">
-              <svg viewBox="0 0 24 24" className="mt-0.5 size-6 shrink-0 text-brand-700" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="M4 12.5l5 5L20 6.5" />
-              </svg>
-              {t}
+        <ol className="mt-5 space-y-4">
+          {items.map((t, i) => (
+            <li key={t} className="flex gap-4 leading-snug">
+              <span aria-hidden className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent-soft font-semibold text-accent tabular-nums">
+                {i + 1}
+              </span>
+              <span className="pt-1">{t}</span>
             </li>
           ))}
-        </ul>
+        </ol>
       </div>
       <Field error={errors.declaration}>
-        <Checkbox
-          checked={!!d.declarationSignedAt}
-          onChange={(v) => set({ declarationSignedAt: v ? new Date().toISOString() : undefined })}
-          label={<span className="text-lg font-semibold">Acepto la declaración responsable.</span>}
-        />
+        <div className={cx('rounded-2xl border-2 px-4 py-2', d.declarationSignedAt ? 'border-accent bg-accent-subtle' : errors.declaration ? 'border-care bg-surface' : 'border-line bg-surface')}>
+          <Checkbox
+            checked={!!d.declarationSignedAt}
+            onChange={(v) => set({ declarationSignedAt: v ? new Date().toISOString() : undefined })}
+            label={<span className="text-lg font-semibold">Acepto la declaración responsable.</span>}
+          />
+        </div>
       </Field>
     </div>
   )
@@ -248,38 +269,40 @@ function CheckGrid({ options, values, onChange }: { options: { id: string; label
 
 export function StepExperiencia({ d, set, errors }: StepProps) {
   return (
-    <div className="space-y-5">
-      <Field label="Años de experiencia" required error={errors.experienceYears}>
+    <div className="space-y-6">
+      <Field label="Años de experiencia" required error={errors.experienceYears} className="sm:max-w-sm">
         <Select
           value={yearsToRange(d.experienceYears)}
           onChange={(v) => set({ experienceYears: v === '' ? -1 : EXPERIENCE_RANGES.find((r) => r.id === v)!.min })}
           options={EXPERIENCE_RANGES}
           placeholder="Selecciona una opción"
-          invalid={!!errors.experienceYears}
         />
       </Field>
-      <div className="rounded-2xl bg-brand-50 px-5 py-4">
+      <div>
         <h2 className="text-xl font-semibold">¿Con qué situaciones tienes experiencia?</h2>
         <p className="text-ink-soft">Abre cada apartado y marca todas las opciones que correspondan.</p>
       </div>
-      {errors.careTypes && <p className="text-sm font-medium text-rosa-600">{errors.careTypes}</p>}
-      <Accordion icon={Users} title="Experiencia en el cuidado" hint="Ejemplo: mayores, personas con dependencia, niños o adultos con discapacidad." count={d.careTypes.length} defaultOpen>
-        <CheckGrid options={CARE_TYPES} values={d.careTypes} onChange={(careTypes) => set({ careTypes })} />
-      </Accordion>
-      <Accordion icon={HeartPulse} title="¿Has cuidado a alguien con alguna de estas enfermedades?" hint="Ejemplo: Alzheimer, Parkinson, ictus, diabetes, problemas de corazón o respiración, etc." count={d.illnesses.length}>
-        <CheckGrid options={ILLNESSES} values={d.illnesses} onChange={(illnesses) => set({ illnesses })} />
-      </Accordion>
-      <Accordion icon={House} title="¿Dónde has trabajado cuidando?" hint="Ejemplo: en casas particulares, residencias, hospitales, etc." count={d.workplaces.length}>
-        <CheckGrid options={WORKPLACES} values={d.workplaces} onChange={(workplaces) => set({ workplaces })} />
-      </Accordion>
+      {errors.careTypes && (
+        <p className="rounded-2xl border-2 border-care bg-care-subtle px-4 py-3 font-medium text-care">{errors.careTypes}</p>
+      )}
+      <div className="space-y-3">
+        <Accordion icon={Users} title="Experiencia en el cuidado" hint="Ejemplo: mayores, personas con dependencia, niños o adultos con discapacidad." count={d.careTypes.length} defaultOpen>
+          <CheckGrid options={CARE_TYPES} values={d.careTypes} onChange={(careTypes) => set({ careTypes })} />
+        </Accordion>
+        <Accordion icon={HeartPulse} title="¿Has cuidado a alguien con alguna de estas enfermedades?" hint="Ejemplo: Alzheimer, Parkinson, ictus, diabetes, problemas de corazón o respiración, etc." count={d.illnesses.length}>
+          <CheckGrid options={ILLNESSES} values={d.illnesses} onChange={(illnesses) => set({ illnesses })} />
+        </Accordion>
+        <Accordion icon={House} title="¿Dónde has trabajado cuidando?" hint="Ejemplo: en casas particulares, residencias, hospitales, etc." count={d.workplaces.length}>
+          <CheckGrid options={WORKPLACES} values={d.workplaces} onChange={(workplaces) => set({ workplaces })} />
+        </Accordion>
+      </div>
       <Field label="Cuéntanos brevemente tu experiencia" required error={errors.experienceText}>
         <Textarea
           value={d.experienceText}
           onChange={(experienceText) => set({ experienceText })}
           max={500}
-          rows={3}
-          invalid={!!errors.experienceText}
-          placeholder="Describe de forma sencilla a quién has cuidado, qué apoyo has dado y en qué entorno (por ejemplo, en casa, en una residencia, etc.)."
+          rows={4}
+          placeholder="Por ejemplo: a quién has cuidado, qué apoyo has dado y dónde (en casa, en una residencia…)."
         />
       </Field>
       <InfoNote>No es necesario incluir nombres ni teléfonos de familias anteriores.</InfoNote>
@@ -292,8 +315,8 @@ export function StepExperiencia({ d, set, errors }: StepProps) {
 export function StepCuidados({ d, set, errors }: StepProps) {
   return (
     <div className="space-y-3">
-      <div className="mb-4 rounded-2xl bg-brand-50 px-5 py-3.5 text-ink">Marca todas las opciones que correspondan a tu experiencia.</div>
-      {errors.tasks && <p className="text-sm font-medium text-rosa-600">{errors.tasks}</p>}
+      <p className="mb-4 text-ink-soft">Abre cada apartado y marca todas las tareas que sabes realizar.</p>
+      {errors.tasks && <p className="rounded-2xl border-2 border-care bg-care-subtle px-4 py-3 font-medium text-care">{errors.tasks}</p>}
       {TASKS.map((t) => {
         const sel = d.tasks[t.id] ?? []
         return (
@@ -324,48 +347,66 @@ export function StepCuidados({ d, set, errors }: StepProps) {
 
 function Panel({ icon: Icon, title, hint, children, aside }: { icon: LucideIcon; title: string; hint: string; children?: ReactNode; aside?: ReactNode }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-line bg-white">
-      <header className="flex flex-wrap items-center gap-4 bg-gradient-to-r from-brand-50 to-white px-4 py-3.5 sm:px-5">
-        <Icon className="size-9 shrink-0 text-brand-800" strokeWidth={1.6} />
+    <section className="card p-5 sm:p-6">
+      <header className="flex flex-wrap items-center gap-4">
+        <span aria-hidden className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent-subtle text-accent">
+          <Icon className="size-6" strokeWidth={1.75} />
+        </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          <p className="text-sm text-ink-soft">{hint}</p>
+          <h2 className="text-xl font-semibold">{title}</h2>
+          <p className="text-ink-soft">{hint}</p>
         </div>
         {aside}
       </header>
-      {children && <div className="px-4 py-3 sm:px-5">{children}</div>}
+      {children && <div className="mt-4">{children}</div>}
     </section>
   )
 }
 
-export function AvailabilitySegment({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+/** Disponible / No disponible: dos opciones grandes con icono y texto (radios nativos). */
+export function AvailabilitySegment({ value, onChange, size = 'md' }: { value: boolean; onChange: (v: boolean) => void; size?: 'md' | 'lg' }) {
+  const name = useId()
   return (
-    <div className="inline-flex rounded-full border border-line bg-white p-1" role="radiogroup" aria-label="Disponibilidad">
-      {[true, false].map((v) => (
-        <button
-          key={String(v)}
-          type="button"
-          role="radio"
-          aria-checked={value === v}
-          onClick={() => onChange(v)}
-          className={cx('rounded-full px-4 py-2 font-semibold transition', value === v ? (v ? 'bg-emerald-700 text-white' : 'bg-slate-600 text-white') : 'text-ink hover:bg-brand-50')}
-        >
-          {v ? 'Disponible' : 'No disponible'}
-        </button>
-      ))}
-    </div>
+    <fieldset className="w-full sm:w-auto">
+      <legend className="sr-only">Tu disponibilidad</legend>
+      <div className="grid grid-cols-2 gap-1 rounded-full bg-sunken p-1">
+        {[true, false].map((v) => {
+          const on = value === v
+          const Icon = v ? CircleCheck : CirclePause
+          return (
+            <label
+              key={String(v)}
+              className={cx(
+                'flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 font-semibold whitespace-nowrap transition-[background-color,color,box-shadow] duration-150',
+                'has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus',
+                size === 'lg' ? 'min-h-14 text-lg' : 'min-h-12',
+                on ? (v ? 'bg-ok text-white shadow-card' : 'bg-off text-white shadow-card') : 'text-ink-soft hover:bg-surface hover:text-ink',
+              )}
+            >
+              <input type="radio" name={name} value={v ? "si" : "no"} className="sr-only" checked={on} onChange={() => onChange(v)} />
+              <Icon aria-hidden className="size-5" strokeWidth={2.25} />
+              {v ? 'Disponible' : 'No disponible'}
+            </label>
+          )
+        })}
+      </div>
+    </fieldset>
   )
 }
 
 export function FormacionFields({ d, set }: StepProps) {
   return (
-    <Panel icon={GraduationCap} title="Formación" hint="Selecciona tu nivel de estudios y formación relacionada con el cuidado.">
+    <Panel icon={GraduationCap} title="Formación" hint="Marca tu nivel de estudios y la formación relacionada con el cuidado.">
       <div className="grid gap-x-6 sm:grid-cols-2">
         {TRAINING.map((t) => (
           <Checkbox key={t.id} checked={d.training.includes(t.id)} onChange={() => set({ training: toggle(d.training, t.id) })} label={t.label} />
         ))}
       </div>
-      {d.training.includes('otra') && <input className="input-base mt-2" placeholder="Especifica cuál" value={d.otherTraining ?? ''} onChange={(e) => set({ otherTraining: e.target.value })} />}
+      {d.training.includes('otra') && (
+        <Field label="¿Qué otra formación tienes?" className="mt-3">
+          <Input value={d.otherTraining ?? ''} placeholder="Ej. Curso de cuidados paliativos" onChange={(e) => set({ otherTraining: e.target.value })} />
+        </Field>
+      )}
     </Panel>
   )
 }
@@ -374,29 +415,24 @@ export function PreferenciasFields({ d, set, errors }: StepProps) {
   return (
     <div className="space-y-4">
       <Panel icon={CalendarDays} title="Disponibilidad en la plataforma" hint="Indica si estás disponible para recibir ofertas de trabajo." aside={<AvailabilitySegment value={d.available} onChange={(available) => set({ available })} />} />
-      <Panel icon={Car} title="Otros datos" hint="Cuéntanos si dispones de alguno de estos recursos.">
-        <div className="grid gap-x-6 sm:grid-cols-2">
-          <Checkbox checked={d.drivingLicense} onChange={(drivingLicense) => set({ drivingLicense })} label="Carné de conducir" />
-          <Checkbox checked={d.vehicle} onChange={(vehicle) => set({ vehicle })} label="Vehículo propio" />
-        </div>
-      </Panel>
       <Panel icon={BriefcaseBusiness} title="Tipo de trabajo" hint="¿En qué tipo de servicios estás interesada?">
-        {errors.jornadas && <p className="mb-1 text-sm font-medium text-rosa-600">{errors.jornadas}</p>}
-        <div className="grid grid-cols-2 gap-x-6 sm:grid-cols-3">
-          {JORNADAS.map((j) => (
-            <Checkbox key={j.id} checked={d.jornadas.includes(j.id)} onChange={() => set({ jornadas: toggle(d.jornadas, j.id) })} label={j.label} />
-          ))}
-        </div>
-        <div className="mt-4 mb-2 text-sm font-semibold text-ink-soft">Días disponibles</div>
-        <DaysRow days={d.days} onToggle={(i) => set({ days: toggle(d.days, i).sort() })} />
+        <Field group label="Jornadas que te interesan" required error={errors.jornadas}>
+          <div className="grid gap-x-6 sm:grid-cols-3">
+            {JORNADAS.map((j) => (
+              <Checkbox key={j.id} checked={d.jornadas.includes(j.id)} onChange={() => set({ jornadas: toggle(d.jornadas, j.id) })} label={j.label} />
+            ))}
+          </div>
+        </Field>
+        <Field group label="Días disponibles" className="mt-5">
+          <DaysRow days={d.days} onToggle={(i) => set({ days: toggle(d.days, i).sort() })} />
+        </Field>
       </Panel>
       <Panel icon={MapPin} title="Zona de trabajo" hint="Indica dónde puedes ofrecer tus servicios.">
-        <Field error={errors.zone}>
-          <Select value={d.zone} onChange={(zone) => set({ zone, extraZones: d.extraZones.filter((z) => z !== zone) })} options={ZONES} placeholder="Selecciona tu zona (provincia, municipio o código postal)" invalid={!!errors.zone} />
+        <Field label="Zona principal" required error={errors.zone}>
+          <Select value={d.zone} onChange={(zone) => set({ zone, extraZones: d.extraZones.filter((z) => z !== zone) })} options={ZONES} placeholder="Selecciona tu zona" />
         </Field>
         {d.zone && (
-          <>
-            <div className="mt-4 mb-2 text-sm font-semibold text-ink-soft">También puedo desplazarme a:</div>
+          <Field group label="También puedo desplazarme a:" className="mt-5">
             <div className="flex flex-wrap gap-2">
               {ZONES.filter((z) => z !== d.zone).map((z) => (
                 <Chip key={z} active={d.extraZones.includes(z)} onClick={() => set({ extraZones: toggle(d.extraZones, z) })}>
@@ -404,20 +440,28 @@ export function PreferenciasFields({ d, set, errors }: StepProps) {
                 </Chip>
               ))}
             </div>
-          </>
+          </Field>
         )}
       </Panel>
-      <Panel icon={Languages} title="Idiomas" hint="¿En qué idiomas puedes comunicarte?">
-        <div className="flex flex-wrap gap-2">
-          {LANGUAGES.map((l) => (
-            <Chip key={l} active={d.languages.includes(l)} onClick={() => set({ languages: toggle(d.languages, l) })}>
-              {l}
-            </Chip>
-          ))}
+      <Panel icon={Car} title="Otros datos" hint="Cuéntanos si dispones de alguno de estos recursos.">
+        <div className="grid gap-x-6 sm:grid-cols-2">
+          <Checkbox checked={d.drivingLicense} onChange={(drivingLicense) => set({ drivingLicense })} label="Carné de conducir" />
+          <Checkbox checked={d.vehicle} onChange={(vehicle) => set({ vehicle })} label="Vehículo propio" />
         </div>
       </Panel>
+      <Panel icon={Languages} title="Idiomas" hint="¿En qué idiomas puedes comunicarte?">
+        <Field group label="Idiomas" className="[&>legend]:sr-only">
+          <div className="flex flex-wrap gap-2">
+            {LANGUAGES.map((l) => (
+              <Chip key={l} active={d.languages.includes(l)} onClick={() => set({ languages: toggle(d.languages, l) })}>
+                {l}
+              </Chip>
+            ))}
+          </div>
+        </Field>
+      </Panel>
       <Panel icon={NotebookPen} title="¿Quieres añadir algo más?" hint="Por ejemplo, tus motivaciones, habilidades o cualquier información que consideres importante.">
-        <Textarea value={d.about} onChange={(about) => set({ about })} max={500} rows={3} placeholder="Escribe aquí…" />
+        <Textarea value={d.about} onChange={(about) => set({ about })} max={500} rows={4} aria-label="Algo más sobre ti" placeholder="Ej. Soy una persona paciente y alegre…" />
       </Panel>
     </div>
   )
@@ -438,9 +482,9 @@ export function validateStep(step: number, d: CaregiverDraft, editing = false): 
   const e: Record<string, string> = {}
   if (step === 1) {
     if (d.name.trim().split(' ').length < 2) e.name = 'Escribe tu nombre y al menos un apellido.'
-    if (!/^\S+@\S+\.\S+$/.test(d.email)) e.email = 'Introduce un correo electrónico válido.'
-    if (!editing && d.password.length < 6) e.password = 'La contraseña debe tener al menos 6 caracteres.'
-    if (d.phone.replace(/\D/g, '').length < 9) e.phone = 'Introduce un teléfono de 9 cifras.'
+    if (!/^\S+@\S+\.\S+$/.test(d.email)) e.email = 'Escribe un correo con el formato nombre@ejemplo.com.'
+    if (!editing && d.password.length < 6) e.password = 'Elige una contraseña de al menos 6 caracteres.'
+    if (d.phone.replace(/\D/g, '').length < 9) e.phone = 'Escribe un teléfono de 9 cifras.'
   }
   if (step === 2) {
     if (!d.spanish && !d.nationality) e.nationality = 'Selecciona tu nacionalidad.'
@@ -448,25 +492,25 @@ export function validateStep(step: number, d: CaregiverDraft, editing = false): 
     if (!kinds.some((k) => k.startsWith('DNI') || k.startsWith('Pasaporte'))) e.identity = 'Sube tu documento de identidad.'
     if (!d.spanish && !kinds.includes('Permiso de residencia y trabajo')) e.permit = 'Sube el documento que acredita tu derecho a trabajar.'
   }
-  if (step === 3 && !d.declarationSignedAt) e.declaration = 'Debes aceptar la declaración responsable para continuar.'
+  if (step === 3 && !d.declarationSignedAt) e.declaration = 'Marca «Acepto la declaración responsable» para continuar.'
   if (step === 4) {
     if (d.experienceYears < 0) e.experienceYears = 'Selecciona tus años de experiencia.'
     if (!d.careTypes.length) e.careTypes = 'Marca al menos una situación en «Experiencia en el cuidado».'
-    if (d.experienceText.trim().length < 20) e.experienceText = 'Cuéntanos tu experiencia en al menos 20 caracteres.'
+    if (d.experienceText.trim().length < 20) e.experienceText = 'Cuéntanos tu experiencia con al menos 20 caracteres.'
   }
   if (step === 5 && !Object.keys(d.tasks).length) e.tasks = 'Marca al menos un cuidado que sepas realizar.'
   if (step === 6) {
-    if (!d.jornadas.length) e.jornadas = 'Elige al menos un tipo de trabajo.'
+    if (!d.jornadas.length) e.jornadas = 'Elige al menos un tipo de jornada.'
     if (!d.zone) e.zone = 'Selecciona tu zona de trabajo.'
   }
   return e
 }
 
-export const STEPS: { title: string; subtitle: string; icon: LucideIcon; Comp: (p: StepProps) => ReactNode }[] = [
-  { title: 'Registro de cuidadora', subtitle: 'Crea tu perfil profesional para que las familias puedan encontrarte.', icon: User, Comp: StepDatos },
-  { title: 'Documentación', subtitle: 'Necesitamos comprobar tu identidad y que puedes trabajar legalmente en España.', icon: FileText, Comp: StepDocumentacion },
-  { title: 'Declaración responsable', subtitle: 'Para completar tu registro, confirma que la siguiente información es cierta.', icon: FileCheck2, Comp: StepDeclaracion },
-  { title: 'Experiencia profesional', subtitle: 'Cuéntanos tu experiencia en el cuidado y apoyo a otras personas.', icon: BriefcaseBusiness, Comp: StepExperiencia },
-  { title: '¿Qué cuidados sabes realizar?', subtitle: 'Indica qué tareas puedes ofrecer en el cuidado y apoyo a otras personas.', icon: HeartPulse, Comp: StepCuidados },
-  { title: 'Formación y preferencias laborales', subtitle: 'Cuéntanos tu formación y cómo te gustaría trabajar.', icon: GraduationCap, Comp: StepFormacionPreferencias },
+export const STEPS: { title: string; short: string; subtitle: string; icon: LucideIcon; Comp: (p: StepProps) => ReactNode }[] = [
+  { title: 'Registro de cuidadora', short: 'Tus datos', subtitle: 'Crea tu perfil profesional para que las familias puedan encontrarte.', icon: User, Comp: StepDatos },
+  { title: 'Documentación', short: 'Documentación', subtitle: 'Necesitamos comprobar tu identidad y que puedes trabajar legalmente en España.', icon: FileText, Comp: StepDocumentacion },
+  { title: 'Declaración responsable', short: 'Declaración', subtitle: 'Para completar tu registro, confirma que la siguiente información es cierta.', icon: FileCheck2, Comp: StepDeclaracion },
+  { title: 'Experiencia profesional', short: 'Experiencia', subtitle: 'Cuéntanos tu experiencia en el cuidado y apoyo a otras personas.', icon: BriefcaseBusiness, Comp: StepExperiencia },
+  { title: '¿Qué cuidados sabes realizar?', short: 'Cuidados', subtitle: 'Indica qué tareas puedes ofrecer en el cuidado y apoyo a otras personas.', icon: HeartPulse, Comp: StepCuidados },
+  { title: 'Formación y preferencias', short: 'Preferencias', subtitle: 'Cuéntanos tu formación y cómo te gustaría trabajar.', icon: GraduationCap, Comp: StepFormacionPreferencias },
 ]

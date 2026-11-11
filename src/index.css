@@ -4,88 +4,299 @@
 @import '@fontsource/fira-sans/600.css';
 @import '@fontsource/fira-sans/700.css';
 
+/*
+ * Primitivas de color. Nunca se usan directamente en componentes:
+ * los componentes solo usan los tokens semánticos de @theme.
+ * Contrastes medidos (WCAG 2.2) sobre el fondo crema #fbf8f4 y blanco.
+ */
+:root {
+  color-scheme: light;
+
+  --sand-0: #ffffff;
+  --sand-50: #fbf8f4; /* fondo de página, cálido */
+  --sand-100: #f4eee6; /* superficies hundidas */
+  --sand-200: #e7dfd5; /* separadores decorativos */
+  --sand-500: #8a8075; /* borde de campos: 3,9:1 sobre blanco */
+
+  --teal-50: #f0f8f6;
+  --teal-100: #e2f2ef;
+  --teal-200: #bfe3dd;
+  --teal-300: #8fcfc6;
+  --teal-400: #7fd8cf; /* anillo de foco sobre fondos oscuros: 7:1 */
+  --teal-500: #17a8a1; /* el teal del logo, solo decorativo */
+  --teal-600: #11807b; /* iconos: 4,8:1 */
+  --teal-700: #0c6566; /* relleno principal y enlaces: 6,8:1 con blanco */
+  --teal-800: #0a5a5b;
+  --teal-900: #0a4a4d;
+  --teal-950: #0a3f45;
+
+  --navy-900: #0f3442; /* texto principal: 12,5:1 */
+  --navy-700: #36505a; /* texto secundario: 8,1:1 */
+  --navy-600: #4f6168; /* texto apagado: 5,6:1 */
+
+  --rose-50: #fdf3f6;
+  --rose-100: #fbe3ea;
+  --rose-200: #f5c3d1;
+  --rose-400: #e8728f; /* el rosa del logo, solo decorativo */
+  --rose-600: #c24470; /* iconos: 4,8:1 */
+  --rose-700: #a8345a; /* relleno y texto rosa: 6:1 */
+  --rose-800: #8f2b4c;
+
+  --green-50: #e5f3e7;
+  --green-700: #2f7a45;
+  --green-800: #2f6f3e;
+  --amber-50: #fbf0d6;
+  --amber-800: #7a5a0e;
+  --slate-50: #eceff1;
+  --slate-600: #5f6b72;
+  --slate-800: #3f4b52;
+  --gold-400: #e0a100;
+}
+
 @theme {
   --font-sans: 'Fira Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  --color-ink: #0f3442;
-  --color-ink-soft: #3c5560;
-  --color-muted: #6b7f87;
-  --color-line: #d8e6e8;
+  /* Escala tipográfica pensada para lectores de 40-60 años: base 18px. */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.4;
+  --text-sm: 1rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1.125rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.5;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.35;
+  --text-2xl: 1.625rem;
+  --text-2xl--line-height: 1.25;
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 1.2;
+  --text-4xl: 2.5rem;
+  --text-4xl--line-height: 1.12;
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 1.08;
+  --text-6xl: 3.5rem;
+  --text-6xl--line-height: 1.05;
 
-  --color-brand-950: #0a3f45;
-  --color-brand-900: #0b5257;
-  --color-brand-800: #0c6566;
-  --color-brand-700: #0f7774;
-  --color-brand-600: #138b86;
-  --color-brand-500: #17a8a1;
-  --color-brand-400: #3fc1ba;
-  --color-brand-200: #bfe8e4;
-  --color-brand-100: #def4f1;
-  --color-brand-50: #f0faf9;
+  /* Superficies y texto */
+  --color-canvas: var(--sand-50);
+  --color-surface: var(--sand-0);
+  --color-sunken: var(--sand-100);
+  --color-line: var(--sand-200);
+  --color-field: var(--sand-500);
+  --color-ink: var(--navy-900);
+  --color-ink-soft: var(--navy-700);
+  --color-muted: var(--navy-600);
 
-  --color-rosa-600: #db5a7c;
-  --color-rosa-500: #e8728f;
-  --color-rosa-300: #f4a9bb;
-  --color-rosa-100: #fde5ec;
-  --color-rosa-50: #fff4f7;
+  /* Acento de marca (teal) */
+  --color-accent: var(--teal-700);
+  --color-accent-hover: var(--teal-900);
+  --color-accent-strong: var(--teal-950);
+  --color-accent-icon: var(--teal-600);
+  --color-accent-brand: var(--teal-500);
+  --color-accent-line: var(--teal-200);
+  --color-accent-soft: var(--teal-100);
+  --color-accent-subtle: var(--teal-50);
+  --color-accent-on-dark: var(--teal-400);
 
-  --color-amber-soft: #fdf3d3;
-  --color-amber-ink: #8a6512;
+  /* Cuidado (rosa): cuidadoras, favoritos y calidez */
+  --color-care: var(--rose-700);
+  --color-care-hover: var(--rose-800);
+  --color-care-icon: var(--rose-600);
+  --color-care-brand: var(--rose-400);
+  --color-care-line: var(--rose-200);
+  --color-care-soft: var(--rose-100);
+  --color-care-subtle: var(--rose-50);
 
-  --shadow-card: 0 1px 2px rgb(15 52 66 / 0.04), 0 6px 20px -8px rgb(15 52 66 / 0.12);
-  --shadow-pop: 0 18px 50px -12px rgb(15 52 66 / 0.28);
+  /* Estados */
+  --color-ok: var(--green-700);
+  --color-ok-ink: var(--green-800);
+  --color-ok-soft: var(--green-50);
+  --color-warn-ink: var(--amber-800);
+  --color-warn-soft: var(--amber-50);
+  --color-off: var(--slate-600);
+  --color-off-ink: var(--slate-800);
+  --color-off-soft: var(--slate-50);
+  --color-star: var(--gold-400);
+
+  --color-focus: var(--teal-900);
+
+  /* Elevación: anillo + elevación + ambiente (borde transparente debajo para forced-colors). */
+  --shadow-card: 0 0 0 1px oklch(0 0 0 / 0.06), 0 1px 2px -1px oklch(0 0 0 / 0.06), 0 2px 4px 0 oklch(0 0 0 / 0.04);
+  --shadow-card-hover: 0 0 0 1px oklch(0 0 0 / 0.08), 0 2px 4px -1px oklch(0 0 0 / 0.08), 0 8px 20px -4px oklch(0 0 0 / 0.08);
+  --shadow-pop: 0 0 0 1px oklch(0 0 0 / 0.06), 0 8px 16px -4px oklch(0 0 0 / 0.1), 0 24px 48px -12px oklch(0 0 0 / 0.18);
+
+  --ease-out-soft: cubic-bezier(0.2, 0, 0, 1);
 }
 
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
+    /* La cabecera es fija: lo enfocado o enlazado nunca queda debajo (WCAG 2.4.11). */
+    scroll-padding-block-start: 6.5rem;
   }
   body {
-    @apply bg-white text-ink antialiased;
-    font-feature-settings: 'kern';
+    @apply bg-canvas font-sans text-base text-ink antialiased;
   }
-  h1, h2, h3, h4 {
-    @apply text-ink tracking-tight;
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-ink;
     text-wrap: balance;
+    letter-spacing: -0.01em;
   }
+  p {
+    text-wrap: pretty;
+  }
+  ::selection {
+    background: var(--teal-200);
+    color: var(--navy-900);
+  }
+
+  /* Foco visible en todos los controles: 3px sólido, 9:1 sobre el fondo. */
   :focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--color-brand-500) 55%, transparent);
-    outline-offset: 2px;
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+  /* Secciones oscuras: el foco cambia a un teal claro (7:1 sobre teal-950). */
+  .on-dark {
+    --color-focus: var(--teal-400);
+  }
+  [tabindex='-1']:focus {
+    outline: none;
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: from-font;
+  }
+
+  dialog {
+    color: inherit;
+  }
+  dialog::backdrop {
+    background: oklch(0.25 0.03 220 / 0.45);
+  }
+
+  @media (forced-colors: active) {
+    :focus-visible {
+      outline-color: Highlight;
+    }
   }
 }
 
+/* Tarjeta: sombra para elevación, borde transparente para el modo de alto contraste. */
 @utility card {
-  @apply rounded-2xl border border-line bg-white shadow-card;
+  @apply rounded-[20px] border border-transparent bg-surface shadow-card;
 }
 
+/* Campo de formulario: 18px (evita el zoom de iOS), borde 3,9:1, 52px de alto. */
 @utility input-base {
-  @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-[15px] text-ink placeholder:text-muted transition focus:border-brand-500 focus:ring-4 focus:ring-brand-100 focus:outline-none;
+  @apply min-h-13 w-full rounded-xl border border-field bg-surface px-4 py-3 text-base text-ink placeholder:text-muted;
+  transition-property: border-color, box-shadow;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+  &:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+    border-color: var(--color-accent);
+  }
+  &[aria-invalid='true'] {
+    border-color: var(--color-care);
+    border-width: 2px;
+  }
 }
 
-.bg-waves {
-  background:
-    radial-gradient(120% 60% at 10% 110%, var(--color-brand-100) 0 35%, transparent 36%),
-    radial-gradient(120% 60% at 95% 115%, var(--color-rosa-100) 0 32%, transparent 33%);
+/* Enlace de texto con subrayado visible: el color nunca es la única pista. */
+@utility link {
+  @apply font-semibold text-accent underline decoration-accent-line decoration-2 underline-offset-4;
+  transition-property: text-decoration-color, color;
+  transition-duration: 150ms;
+  &:hover {
+    @apply text-accent-hover decoration-accent;
+  }
 }
 
-.hero-mask {
-  border-radius: 58% 42% 0 0 / 52% 38% 0 0;
+/* Pulsar: escala 0.96 en 150ms, nunca si está deshabilitado. */
+@utility pressable {
+  @media (prefers-reduced-motion: no-preference) {
+    transition-property: scale, background-color, box-shadow, border-color, color;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+    &:not(:disabled):not([aria-disabled='true']):active {
+      scale: 0.96;
+    }
+  }
 }
 
-@keyframes pop-in {
-  from { opacity: 0; transform: translateY(6px) scale(0.98); }
-  to { opacity: 1; transform: none; }
+/* Entradas: opacidad, 4px de desenfoque y 12px de desplazamiento; con movimiento reducido, solo opacidad. */
+@keyframes enter {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    translate: 0 12px;
+  }
 }
-.animate-pop { animation: pop-in 0.18s ease-out; }
+@keyframes enter-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes enter-pop {
+  from {
+    opacity: 0;
+    scale: 0.97;
+    translate: 0 6px;
+  }
+}
+@keyframes enter-drawer {
+  from {
+    translate: 100% 0;
+  }
+}
+
+.animate-enter,
+.animate-pop,
+.animate-drawer {
+  animation: enter-fade 200ms ease-out both;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .animate-enter {
+    animation: enter 300ms ease-out both;
+  }
+  .animate-enter-2 {
+    animation-delay: 100ms;
+  }
+  .animate-enter-3 {
+    animation-delay: 200ms;
+  }
+  .animate-pop {
+    animation: enter-pop 180ms var(--ease-out-soft) both;
+  }
+  .animate-drawer {
+    animation: enter-drawer 280ms var(--ease-out-soft) both;
+  }
+}
 
 @keyframes typing {
-  0%, 80%, 100% { opacity: 0.25; }
-  40% { opacity: 1; }
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+  }
+  40% {
+    opacity: 1;
+  }
 }
-.typing span { animation: typing 1.2s infinite; }
-.typing span:nth-child(2) { animation-delay: 0.15s; }
-.typing span:nth-child(3) { animation-delay: 0.3s; }
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: no-preference) {
+  .typing span {
+    animation: typing 1.2s infinite;
+  }
+  .typing span:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .typing span:nth-child(3) {
+    animation-delay: 0.3s;
+  }
 }

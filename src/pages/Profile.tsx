@@ -1,21 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
-import {
-  ArrowLeft,
-  CalendarDays,
-  ChevronRight,
-  Clock,
-  GraduationCap,
-  Handshake,
-  Heart,
-  Info,
-  MapPin,
-  MessageCircleMore,
-  Search,
-  Send,
-} from 'lucide-react'
+import { CalendarDays, Clock, GraduationCap, Handshake, Heart, MapPin, MessageCircleMore, Search, Send } from 'lucide-react'
 import { Container } from '../components/Layout'
-import { Avatar, Button, CaregiverBadges, DaysRow, Field, InfoNote, LoginRequired, Select, Stars, Textarea } from '../components/ui'
+import { Avatar, BackLink, Button, CaregiverBadges, DaysRow, ErrorSummary, Field, FormNote, InfoNote, Input, LoginRequired, Select, Stars, Textarea } from '../components/ui'
 import { CaregiverProfileView, jornadaText } from '../components/CaregiverProfileView'
 import { FavoriteButton } from './Search'
 import { useMe, useStore } from '../store'
@@ -33,30 +20,42 @@ export function CaregiverPublicProfile() {
   const isMe = me.caregiver?.id === c.id
 
   let contact
-  if (isMe) contact = <Button size="lg" variant="soft" to="/cuidadora/perfil">Este es tu perfil</Button>
+  if (isMe)
+    contact = (
+      <Button size="lg" variant="soft" to="/cuidadora/perfil">
+        Este es tu perfil
+      </Button>
+    )
   else if (existing?.status === 'aceptada')
-    contact = <Button size="lg" icon={MessageCircleMore} to={`/mensajes/${existing.id}`} className="sm:min-w-72">Ir al chat</Button>
+    contact = (
+      <Button size="lg" icon={MessageCircleMore} to={`/mensajes/${existing.id}`} className="sm:min-w-64">
+        Ir al chat
+      </Button>
+    )
   else if (existing?.status === 'pendiente')
-    contact = <Button size="lg" variant="soft" icon={Clock} to="/familia/solicitudes" className="sm:min-w-72">Solicitud enviada · pendiente</Button>
+    contact = (
+      <Button size="lg" variant="soft" icon={Clock} to="/familia/solicitudes" className="sm:min-w-64">
+        Solicitud enviada: pendiente
+      </Button>
+    )
   else
     contact = (
-      <Button size="lg" icon={MessageCircleMore} className="sm:min-w-72" disabled={me.role === 'caregiver' || !c.available} onClick={() => navigate(me.family ? `/cuidadoras/${c.id}/contacto` : `/login?next=/cuidadoras/${c.id}/contacto`)}>
+      <Button size="lg" icon={MessageCircleMore} className="sm:min-w-64" disabled={me.role === 'caregiver' || !c.available} onClick={() => navigate(me.family ? `/cuidadoras/${c.id}/contacto` : `/login?next=/cuidadoras/${c.id}/contacto`)}>
         {c.available ? 'Solicitar contacto' : 'No disponible ahora'}
       </Button>
     )
 
   return (
     <Container className="max-w-6xl py-6 sm:py-8">
-      <button type="button" onClick={() => (window.history.length > 2 ? navigate(-1) : navigate('/buscar/resultados'))} className="mb-5 flex w-full items-center gap-4 rounded-full border border-brand-100 bg-gradient-to-r from-brand-50 to-brand-100/70 px-5 py-3.5 text-left text-lg font-semibold">
-        <ArrowLeft className="size-6 text-brand-700" />
-        Volver a resultados
-      </button>
+      <div className="mb-4">
+        <BackLink onClick={() => (window.history.length > 2 ? navigate(-1) : navigate('/buscar/resultados'))}>Volver a resultados</BackLink>
+      </div>
       <CaregiverProfileView
         c={c}
         actions={
           <>
-            {!isMe && <FavoriteButton c={c} size="lg" />}
             {contact}
+            {!isMe && <FavoriteButton c={c} size="lg" />}
           </>
         }
       />
@@ -64,7 +63,9 @@ export function CaregiverPublicProfile() {
         <div className="mt-5">
           <InfoNote>
             <strong>Cuidadora de confianza María te Cuida:</strong> ya ha trabajado con familias a través de la plataforma y su trabajo ha sido valorado positivamente por el equipo.{' '}
-            <Link to="/confianza" className="font-semibold text-brand-800 underline">Más información</Link>
+            <Link to="/confianza" className="link">
+              Qué significa cada distintivo
+            </Link>
           </InfoNote>
         </div>
       )}
@@ -86,118 +87,150 @@ export function ContactRequestPage() {
   const [jornada, setJornada] = useState(c?.jornadas.length === 1 ? c.jornadas[0] : '')
   const [personType, setPersonType] = useState(me.family?.personType ?? 'mayor')
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const summaryRef = useRef<HTMLDivElement>(null)
 
   if (!c) return <Navigate to="/buscar" replace />
   if (!me.family) return <LoginRequired next={`/cuidadoras/${c.id}/contacto`} role="family" />
   const existing = me.myRequests.find((r) => r.caregiverId === c.id && (r.status === 'pendiente' || r.status === 'aceptada'))
   if (existing) return <Navigate to={existing.status === 'aceptada' ? `/mensajes/${existing.id}` : '/familia/solicitudes'} replace />
 
-  const submit = () => {
+  const submit = (ev: React.FormEvent) => {
+    ev.preventDefault()
     const e: Record<string, string> = {}
-    if (need.trim().length < 15) e.need = 'Cuéntale un poco más (mínimo 15 caracteres).'
+    if (need.trim().length < 15) e.need = 'Cuéntale un poco más: escribe al menos 15 caracteres.'
     if (!start) e.start = 'Indica cuándo te gustaría comenzar.'
-    if (start === 'fecha' && !startDate) e.start = 'Elige una fecha.'
+    if (start === 'fecha' && !startDate) e.startDate = 'Elige la fecha de inicio.'
     if (!jornada) e.jornada = 'Selecciona el tipo de jornada.'
     setErrors(e)
-    if (Object.keys(e).length) return
+    if (Object.keys(e).length) {
+      requestAnimationFrame(() => summaryRef.current?.focus())
+      return
+    }
     sendRequest({ familyId: me.family!.id, caregiverId: c.id, need: need.trim(), start, startDate: start === 'fecha' ? startDate : undefined, jornada, personType, zone: me.family!.zone })
     toast(`Solicitud enviada a ${shortName(c.name)}. Te avisaremos cuando responda.`)
     navigate('/familia/solicitudes')
   }
 
-  const care = c.careTypes.slice(0, 2).map((x) => labelOf(CARE_TYPES, x)).join(' / ')
+  const care = c.careTypes
+    .slice(0, 2)
+    .map((x) => labelOf(CARE_TYPES, x))
+    .join(' / ')
+  const fact = 'flex items-start gap-3'
+  const icon = 'mt-0.5 size-5 shrink-0 text-accent-icon'
 
   return (
     <Container className="max-w-6xl py-6 sm:py-8">
-      <Link to={`/cuidadoras/${c.id}`} className="mb-5 flex items-center gap-4 rounded-full border border-brand-100 bg-gradient-to-r from-brand-50 to-brand-100/70 px-5 py-3.5 text-lg font-semibold">
-        <ArrowLeft className="size-6 text-brand-700" />
-        Solicitar contacto
-      </Link>
-      <div className="grid gap-5 lg:grid-cols-[0.75fr_1.25fr]">
-        <aside className="card h-fit p-5">
-          <div className="flex items-center gap-4">
-            <Avatar name={c.name} photo={c.photo} size={96} />
-            <div>
-              <h2 className="text-3xl font-bold">{shortName(c.name)}</h2>
-              <div className="mt-1"><CaregiverBadges c={c} size="sm" /></div>
-              <div className="mt-1"><Stars rating={c.rating} reviews={c.reviews} size="sm" /></div>
-            </div>
-          </div>
-          <ul className="mt-5 space-y-3 border-t border-line pt-5 text-[16px]">
-            <li className="flex items-center gap-3"><CalendarDays className="size-5 text-brand-600" />{yearsLabel(c.experienceYears)}</li>
-            <li className="flex items-center gap-3"><GraduationCap className="size-5 text-brand-600" />{c.training.map((t) => TRAINING_SHORT[t]).slice(0, 2).join(' · ')}</li>
-            <li className="flex items-center gap-3"><Heart className="size-5 text-brand-600" />{care}</li>
-            <li className="flex items-center gap-3"><MapPin className="size-5 text-brand-600" />{c.zone}</li>
-          </ul>
-          <div className="mt-5 rounded-2xl bg-brand-50 p-4">
-            <div className="flex items-center gap-3 font-semibold"><CalendarDays className="size-6 text-brand-700" />Disponibilidad</div>
-            <div className="mb-3 pl-9 text-ink-soft">{jornadaText(c)}</div>
-            <DaysRow days={c.days} size="sm" />
-          </div>
-        </aside>
-
-        <section className="card overflow-hidden">
-          <header className="flex items-start gap-4 bg-gradient-to-r from-brand-50 to-white px-5 py-5 sm:px-7">
-            <MessageCircleMore className="size-11 shrink-0 text-brand-600" strokeWidth={1.6} />
-            <div>
-              <h1 className="text-3xl font-bold">Solicitar contacto</h1>
-              <p className="text-ink-soft">Cuéntale a {firstName(c.name)} qué necesitas y organiza un primer contacto.</p>
-            </div>
-          </header>
-          <div className="space-y-5 px-5 py-6 sm:px-7">
+      <div className="mb-4">
+        <BackLink to={`/cuidadoras/${c.id}`}>Volver al perfil de {firstName(c.name)}</BackLink>
+      </div>
+      <div className="grid items-start gap-5 lg:grid-cols-[1.3fr_0.7fr]">
+        <section className="card p-6 sm:p-8">
+          <h1 className="text-3xl font-bold sm:text-4xl">Solicitar contacto</h1>
+          <p className="mt-2 text-lg text-ink-soft">Cuéntale a {firstName(c.name)} qué necesitas y organiza un primer contacto.</p>
+          <form onSubmit={submit} noValidate className="mt-7 space-y-6">
+            <ErrorSummary ref={summaryRef} errors={errors} />
+            <FormNote />
             <Field label="Describe brevemente tu necesidad" required error={errors.need}>
-              <Textarea value={need} onChange={setNeed} max={300} rows={3} invalid={!!errors.need} placeholder="Ej. Acompañamiento para persona mayor por las tardes, apoyo en la higiene y ayuda en la movilidad…" />
+              <Textarea value={need} onChange={setNeed} max={300} rows={4} placeholder="Ej. Acompañamiento para persona mayor por las tardes, apoyo en la higiene y ayuda en la movilidad…" />
             </Field>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="¿Cuándo te gustaría comenzar?" error={errors.start}>
-                <Select value={start} onChange={setStart} options={START_OPTIONS} placeholder="Selecciona una fecha" invalid={!!errors.start} />
-                {start === 'fecha' && <input type="date" className="input-base mt-2" value={startDate} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setStartDate(e.target.value)} />}
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label="¿Cuándo te gustaría comenzar?" required error={errors.start}>
+                <Select value={start} onChange={setStart} options={START_OPTIONS} placeholder="Selecciona una opción" />
               </Field>
-              <Field label="Tipo de jornada" error={errors.jornada}>
-                <Select value={jornada} onChange={setJornada} options={JORNADAS} placeholder="Selecciona una opción" invalid={!!errors.jornada} />
+              <Field label="Tipo de jornada" required error={errors.jornada}>
+                <Select value={jornada} onChange={setJornada} options={JORNADAS} placeholder="Selecciona una opción" />
               </Field>
             </div>
+            {start === 'fecha' && (
+              <Field label="Fecha de inicio" required error={errors.startDate} className="sm:max-w-xs">
+                <Input type="date" value={startDate} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setStartDate(e.target.value)} />
+              </Field>
+            )}
             <Field label="¿A quién hay que cuidar?">
               <Select value={personType} onChange={setPersonType} options={PERSON_TYPES} />
             </Field>
-            <div className="flex items-start gap-3 rounded-2xl border border-brand-100 bg-brand-50/60 p-4">
-              <Info className="mt-0.5 size-6 shrink-0 text-brand-700" />
-              <div>
-                <div className="font-semibold">¿Qué ocurre después?</div>
-                <p className="text-ink-soft">
-                  {firstName(c.name)} recibirá tu solicitud y podrá aceptarla o rechazarla. Si ambas partes estáis de acuerdo, se confirma el match y <strong className="text-brand-800">podréis organizar</strong> los detalles por el chat privado.
-                </p>
+            <InfoNote>
+              <strong className="block font-semibold">¿Qué ocurre después?</strong>
+              {firstName(c.name)} recibirá tu solicitud y podrá aceptarla o rechazarla. Si las dos estáis de acuerdo, se confirma el match y podréis organizar los detalles por el chat privado.
+            </InfoNote>
+            <div className="flex flex-col gap-3 border-t border-line pt-6 sm:flex-row">
+              <Button type="submit" size="lg" icon={Send} className="sm:min-w-64">
+                Enviar solicitud
+              </Button>
+              <Button variant="ghost" size="lg" to={`/cuidadoras/${c.id}`}>
+                Cancelar
+              </Button>
+            </div>
+          </form>
+        </section>
+
+        <aside aria-label={`Resumen de ${shortName(c.name)}`} className="card h-fit p-6">
+          <div className="flex items-center gap-4">
+            <Avatar name={c.name} photo={c.photo} size={88} />
+            <div className="min-w-0">
+              <h2 className="text-2xl font-bold">{shortName(c.name)}</h2>
+              <div className="mt-1.5">
+                <CaregiverBadges c={c} size="sm" />
+              </div>
+              <div className="mt-1.5">
+                <Stars rating={c.rating} reviews={c.reviews} size="sm" />
               </div>
             </div>
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-center">
-              <Button variant="outline" size="lg" to={`/cuidadoras/${c.id}`} className="sm:min-w-52">Cancelar</Button>
-              <Button size="lg" icon={Send} onClick={submit} className="sm:min-w-72">Enviar solicitud</Button>
-            </div>
           </div>
-        </section>
+          <ul className="mt-6 space-y-3 border-t border-line pt-5">
+            <li className={fact}>
+              <CalendarDays aria-hidden className={icon} strokeWidth={2} />
+              {yearsLabel(c.experienceYears)}
+            </li>
+            <li className={fact}>
+              <GraduationCap aria-hidden className={icon} strokeWidth={2} />
+              {c.training
+                .map((t) => TRAINING_SHORT[t])
+                .slice(0, 2)
+                .join(' · ') || 'Sin formación indicada'}
+            </li>
+            <li className={fact}>
+              <Heart aria-hidden className={icon} strokeWidth={2} />
+              {care}
+            </li>
+            <li className={fact}>
+              <MapPin aria-hidden className={icon} strokeWidth={2} />
+              {c.zone}
+            </li>
+          </ul>
+          <div className="mt-6 rounded-2xl bg-sunken p-4">
+            <h3 className="font-semibold">Disponibilidad</h3>
+            <p className="mb-3 text-ink-soft">{jornadaText(c)}</p>
+            <DaysRow days={c.days} size="sm" />
+          </div>
+        </aside>
       </div>
 
-      <section className="card mt-5 grid items-center gap-5 bg-gradient-to-r from-brand-50 to-white p-5 md:grid-cols-[auto_1fr_auto_1fr_auto_1fr] md:gap-3">
-        <h2 className="text-2xl font-bold md:pr-4">¿Cómo funciona?</h2>
-        {[
-          { icon: Search, n: 1, t: 'Buscas y eliges', d: 'Encuentra a la cuidadora que se adapta a ti.' },
-          { icon: Send, n: 2, t: 'Envías tu solicitud', d: 'Cuéntale tu necesidad y disponibilidad.' },
-          { icon: Handshake, n: 3, t: 'Hacéis match', d: 'Si ambos aceptáis, podréis contactar y organizar el cuidado.' },
-        ].map((s, i) => (
-          <div key={s.n} className="contents">
-            {i > 0 && <ChevronRight className="hidden size-6 text-brand-600 md:block" />}
-            <div className="flex items-start gap-3">
-              <s.icon className="size-9 shrink-0 text-brand-600" strokeWidth={1.6} />
+      <section aria-labelledby="como-sigue" className="mt-8">
+        <h2 id="como-sigue" className="text-2xl font-bold">
+          ¿Cómo funciona?
+        </h2>
+        <ol className="mt-4 grid gap-4 md:grid-cols-3">
+          {[
+            { icon: Search, t: 'Buscas y eliges', d: 'Encuentra a la cuidadora que se adapta a ti.' },
+            { icon: Send, t: 'Envías tu solicitud', d: 'Cuéntale tu necesidad y disponibilidad.' },
+            { icon: Handshake, t: 'Hacéis match', d: 'Si las dos aceptáis, podréis hablar y organizar el cuidado.' },
+          ].map((s, i) => (
+            <li key={s.t} className={'flex items-start gap-4 rounded-[20px] p-5 ' + (i === 1 ? 'bg-accent-soft' : 'bg-surface shadow-card')}>
+              <span aria-hidden className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-white tabular-nums">
+                {i + 1}
+              </span>
               <div>
-                <div className="flex items-center gap-2 font-semibold">
-                  <span className="flex size-6 items-center justify-center rounded-full bg-brand-700 text-xs text-white">{s.n}</span>
+                <h3 className="text-lg font-semibold">
+                  <span className="sr-only">Paso {i + 1}: </span>
                   {s.t}
-                </div>
-                <p className="text-sm text-ink-soft">{s.d}</p>
+                  {i === 1 && <span className="ms-2 text-sm font-semibold text-accent">· Estás aquí</span>}
+                </h3>
+                <p className="text-ink-soft">{s.d}</p>
               </div>
-            </div>
-          </div>
-        ))}
+            </li>
+          ))}
+        </ol>
       </section>
     </Container>
   )
