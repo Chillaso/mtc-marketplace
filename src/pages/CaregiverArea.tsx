@@ -342,7 +342,7 @@ function Requests({ c }: { c: Caregiver }) {
     <Container className="max-w-4xl py-6 sm:py-8">
       <h1 className="text-3xl font-bold sm:text-4xl">Solicitudes de contacto</h1>
       <p className="mt-2 max-w-[60ch] text-lg text-ink-soft">Las familias te cuentan qué necesitan. Si aceptas, se confirma el match y se abre el chat privado.</p>
-      <div role="group" aria-label="Mostrar solicitudes" className="mt-6 inline-grid grid-cols-2 gap-1 rounded-full bg-sunken p-1">
+      <div role="group" aria-label="Mostrar solicitudes" className="mt-6 inline-grid grid-cols-2 gap-1 rounded-full bg-sky-soft p-1">
         {(
           [
             ['pendiente', `Nuevas (${pendingCount})`],
@@ -354,7 +354,7 @@ function Requests({ c }: { c: Caregiver }) {
             type="button"
             aria-pressed={tab === k}
             onClick={() => setTab(k)}
-            className={cx('min-h-12 rounded-full px-5 font-semibold transition-[background-color,color,box-shadow] duration-150', tab === k ? 'bg-surface text-ink shadow-card' : 'text-ink-soft hover:text-ink')}
+            className={cx('min-h-12 rounded-full px-5 font-semibold transition-[background-color,color,box-shadow] duration-150', tab === k ? 'bg-sky text-ink shadow-card' : 'text-ink hover:bg-sky-line/60')}
           >
             {label}
           </button>
@@ -379,7 +379,7 @@ function Requests({ c }: { c: Caregiver }) {
                   <div className="text-sm text-muted">Recibida {fmtWhen(r.createdAt)}</div>
                 </div>
                 {r.status === 'aceptada' && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-ok-soft px-3 py-1 text-sm font-semibold text-ok-ink">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-care-soft px-3 py-1 text-sm font-semibold text-care">
                     <Check aria-hidden className="size-4" strokeWidth={2.5} />
                     Match confirmado
                   </span>
@@ -391,7 +391,7 @@ function Requests({ c }: { c: Caregiver }) {
                   </span>
                 )}
               </div>
-              <blockquote className="mt-4 rounded-2xl bg-sunken p-4 leading-relaxed">«{r.need}»</blockquote>
+              <blockquote className="mt-4 rounded-2xl bg-accent-soft p-4 leading-relaxed">«{r.need}»</blockquote>
               <ul className="mt-4 grid gap-2 text-ink-soft sm:grid-cols-2">
                 <li className="flex items-center gap-2.5">
                   <User aria-hidden className="size-5 text-accent-icon" strokeWidth={2} />

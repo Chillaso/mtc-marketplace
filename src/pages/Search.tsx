@@ -29,7 +29,7 @@ import { CARE_TYPES, DAYS, EXPERIENCE_RANGES, JORNADAS, LANGUAGES, TRAINING, TRA
 import type { Caregiver, SearchFilters } from '../data/types'
 import { emptyFilters } from '../data/seed'
 import { activeCount, search } from '../lib/search'
-import { cx, img, shortName, yearsLabel } from '../lib/format'
+import { cx, shortName, yearsLabel } from '../lib/format'
 import { jornadaText } from '../components/CaregiverProfileView'
 
 const toggle = <T,>(arr: T[], v: T) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v])
@@ -104,7 +104,7 @@ export function IdealFilters({ f, set }: { f: SearchFilters; set: (p: Partial<Se
           Más filtros
           <ChevronDown aria-hidden className={cx('size-5 motion-safe:transition-[rotate] motion-safe:duration-200', more && 'rotate-180')} strokeWidth={2.25} />
         </button>
-        <div id={moreId} hidden={!more} className="mt-3 grid gap-x-6 rounded-2xl bg-sunken px-5 py-2 sm:grid-cols-2">
+        <div id={moreId} hidden={!more} className="mt-3 grid gap-x-6 rounded-2xl bg-accent-soft px-5 py-2 sm:grid-cols-2">
           <Checkbox checked={f.docsReviewed} onChange={(docsReviewed) => set({ docsReviewed })} label="Con documentación revisada" />
           <Checkbox checked={f.drivingLicense} onChange={(drivingLicense) => set({ drivingLicense })} label="Con carné de conducir" />
           <Checkbox checked={f.vehicle} onChange={(vehicle) => set({ vehicle })} label="Con vehículo propio" />
@@ -167,7 +167,12 @@ export function SearchHome() {
   return (
     <>
       <section className="relative overflow-hidden border-b border-line bg-surface">
-        <img src={img('manos.jpg')} alt="" className="absolute inset-y-0 right-0 hidden h-full w-[40%] object-cover [mask-image:linear-gradient(to_right,transparent,black_40%)] md:block" />
+        {/* Fondo decorativo: manchas suaves con los colores de marca, sin fotografía. */}
+        <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-full overflow-hidden md:w-[55%]">
+          <span className="absolute -top-20 right-[12%] size-80 rounded-full bg-accent-line opacity-70 blur-3xl" />
+          <span className="absolute top-6 right-[38%] size-60 rounded-full bg-sky-line opacity-60 blur-3xl" />
+          <span className="absolute -bottom-24 right-[-6%] size-80 rounded-full bg-care-line opacity-70 blur-3xl" />
+        </div>
         <Container className="relative py-10 sm:py-14">
           <h1 className="text-3xl font-bold sm:text-5xl md:max-w-[58%]">
             Hola{me.greetingName && me.role === 'family' ? `, ${me.greetingName}` : ''}. ¿En qué podemos ayudarte?
@@ -178,13 +183,15 @@ export function SearchHome() {
 
       <Container className="max-w-6xl py-8 sm:py-10">
         <div className="grid gap-4 sm:grid-cols-2">
-          <a href="#buscador" className="pressable flex items-center gap-4 rounded-[20px] border-2 border-accent bg-accent-subtle p-5 hover:bg-accent-soft">
-            <IconBubble icon={SearchIcon} size="lg" />
+          <a href="#buscador" className="pressable flex items-center gap-4 rounded-[20px] bg-sky p-5 text-ink shadow-card hover:bg-sky-line">
+            <span aria-hidden className="flex size-14 shrink-0 items-center justify-center rounded-full bg-white/55">
+              <SearchIcon className="size-7" strokeWidth={1.75} />
+            </span>
             <span className="flex-1">
               <span className="block text-xl font-semibold">Buscar yo una cuidadora</span>
-              <span className="text-ink-soft">Consulta perfiles y contacta.</span>
+              <span>Consulta perfiles y contacta.</span>
             </span>
-            <ChevronDown aria-hidden className="size-6 text-accent" strokeWidth={2.25} />
+            <ChevronDown aria-hidden className="size-6" strokeWidth={2.25} />
           </a>
           <Link to="/servicio-integral" className="card pressable flex items-center gap-4 p-5 hover:shadow-card-hover">
             <IconBubble icon={Handshake} size="lg" tone="rosa" />
@@ -265,7 +272,7 @@ export function FavoriteButton({ c, size = 'md' }: { c: Caregiver; size?: 'md' |
   if (me.role === 'caregiver') return null
   if (size === 'lg')
     return (
-      <Button variant="outline" size="lg" onClick={onClick} aria-pressed={fav} className="sm:min-w-64">
+      <Button variant={fav ? 'danger' : 'outline'} size="lg" onClick={onClick} aria-pressed={fav} className="sm:min-w-64">
         <Heart aria-hidden className={cx('size-6', fav && 'fill-care-icon text-care-icon')} strokeWidth={2} />
         {fav ? 'Guardada en favoritas' : 'Guardar en favoritas'}
       </Button>

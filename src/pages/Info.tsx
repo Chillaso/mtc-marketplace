@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BadgeCheck, CheckCircle2, ChevronRight, ClipboardCheck, FileSearch, Handshake, Mail, Phone, Search, Send, ShieldCheck, User, UserCheck } from 'lucide-react'
+import { BadgeCheck, CheckCircle2, ChevronRight, ClipboardCheck, Handshake, Mail, Phone, Search, Send, ShieldCheck, User } from 'lucide-react'
 import { Container } from '../components/Layout'
 import { Button, Checkbox, ErrorSummary, Field, FormNote, IconBubble, IconInput, InfoNote, PageTitle, Select, Textarea, TrustedBadge, VerifiedBadge } from '../components/ui'
 import { useMe, useStore } from '../store'
+import { cx } from '../lib/format'
 import { JORNADAS, PERSON_TYPES, START_OPTIONS, TASKS, ZONES } from '../data/catalog'
 
 export function IntegralService() {
@@ -87,12 +88,12 @@ export function IntegralService() {
           <p className="mt-3 max-w-2xl text-lg text-ink-soft">Cuéntanos qué necesitáis y el equipo de María te Cuida se encargará de buscar y seleccionar a la cuidadora más adecuada para tu familia.</p>
           <ol className="mt-8 grid gap-4 sm:grid-cols-3">
             {[
-              { icon: Send, t: 'Nos cuentas tu caso', d: 'Rellena el formulario en 2 minutos.' },
-              { icon: FileSearch, t: 'Buscamos y seleccionamos', d: 'Revisamos perfiles y hablamos con las candidatas.' },
-              { icon: UserCheck, t: 'Te presentamos opciones', d: 'Eliges con nuestro asesoramiento.' },
+              { t: 'Nos cuentas tu caso', d: 'Rellena el formulario en 2 minutos.', box: 'bg-accent-soft', dot: 'bg-accent text-white' },
+              { t: 'Buscamos y seleccionamos', d: 'Revisamos perfiles y hablamos con las candidatas.', box: 'bg-sky-subtle', dot: 'bg-sky text-ink' },
+              { t: 'Te presentamos opciones', d: 'Eliges con nuestro asesoramiento.', box: 'bg-care-subtle', dot: 'bg-care text-white' },
             ].map((s, i) => (
-              <li key={s.t} className="flex items-start gap-3 rounded-[20px] bg-canvas p-4">
-                <span aria-hidden className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-white tabular-nums">
+              <li key={s.t} className={cx('flex items-start gap-3 rounded-[20px] p-4', s.box)}>
+                <span aria-hidden className={cx('flex size-10 shrink-0 items-center justify-center rounded-full font-bold tabular-nums', s.dot)}>
                   {i + 1}
                 </span>
                 <div>
@@ -168,33 +169,33 @@ export function Trust() {
       <PageTitle title="Documentación y confianza" subtitle="En cada perfil distinguimos dos cosas diferentes, para que las familias sepan exactamente qué significa cada una." />
       <div className="mt-8 grid gap-5 md:grid-cols-2">
         <section className="card p-6 sm:p-8">
-          <IconBubble icon={ClipboardCheck} size="lg" />
+          <IconBubble icon={ClipboardCheck} size="lg" tone="sky-solid" />
           <h2 className="mt-5 text-2xl font-bold">Documentación revisada</h2>
           <div className="mt-3">
-            <VerifiedBadge />
+            <VerifiedBadge tone="sky" />
           </div>
           <p className="mt-4 text-ink-soft">Durante el registro, cada cuidadora aporta su documento de identidad y, si es extranjera, la autorización para trabajar en España. También firma una declaración responsable. El equipo revisa los documentos aportados.</p>
           <ul className="mt-5 space-y-2.5">
             {['Documento de identidad (DNI, pasaporte o equivalente)', 'Permiso de residencia y trabajo, TIE u otra autorización válida', 'Declaración responsable firmada', 'Certificados de formación (opcional)'].map((x) => (
               <li key={x} className="flex gap-3">
-                <BadgeCheck aria-hidden className="mt-0.5 size-5 shrink-0 text-accent-icon" strokeWidth={2} />
+                <BadgeCheck aria-hidden className="mt-0.5 size-5 shrink-0 text-sky" strokeWidth={2} />
                 {x}
               </li>
             ))}
           </ul>
         </section>
-        <section className="card p-6 sm:p-8">
-          <IconBubble icon={ShieldCheck} size="lg" />
+        <section className="card bg-care-subtle p-6 sm:p-8">
+          <IconBubble icon={ShieldCheck} size="lg" tone="rosa-solid" />
           <h2 className="mt-5 text-2xl font-bold">Cuidadora de confianza María te Cuida</h2>
           <div className="mt-3">
-            <TrustedBadge />
+            <TrustedBadge tone="care" />
           </div>
           <p className="mt-4 text-ink-soft">
             Es un distintivo que se concede a profesionales que <strong className="font-semibold text-ink">ya han trabajado con familias a través de la plataforma</strong> y cuyo trabajo ha sido{' '}
             <strong className="font-semibold text-ink">valorado positivamente por el equipo</strong>.
           </p>
           <div className="mt-5">
-            <InfoNote>No equivale a tener la documentación revisada: son indicadores independientes.</InfoNote>
+            <InfoNote tone="rosa" className="!bg-surface">No equivale a tener la documentación revisada: son indicadores independientes.</InfoNote>
           </div>
         </section>
       </div>

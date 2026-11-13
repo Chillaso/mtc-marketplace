@@ -81,7 +81,7 @@ function Notifications() {
       <button ref={buttonRef} type="button" onClick={toggle} aria-expanded={open} aria-controls={panelId} aria-label={unread ? `Avisos, ${unread} sin leer` : 'Avisos'} className={iconBtn}>
         <Bell aria-hidden className="size-6" strokeWidth={2} />
         {unread > 0 && (
-          <span aria-hidden className="absolute top-1 right-0.5 flex min-w-5 items-center justify-center rounded-full bg-care px-1 text-xs font-bold text-white tabular-nums ring-2 ring-surface">
+          <span aria-hidden className="absolute top-1 right-0.5 flex min-w-5 items-center justify-center rounded-full bg-sky px-1 text-xs font-bold text-ink tabular-nums ring-2 ring-surface">
             {unread}
           </span>
         )}
@@ -331,7 +331,7 @@ function Footer() {
       <div className="bg-accent-subtle">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.2fr_1fr_1fr]">
           <div>
-            <img src={img('logo.png')} alt="María te Cuida" className="h-11 w-auto" />
+            <img src={img('logo-verde.png')} alt="María te Cuida" className="h-11 w-auto" />
             <p className="mt-3 max-w-xs text-ink-soft">Cuidado de personas, con confianza y cercanía.</p>
           </div>
           <nav aria-label="Enlaces del pie">

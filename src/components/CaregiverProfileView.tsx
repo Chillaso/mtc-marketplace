@@ -8,12 +8,14 @@ import { shortName, yearsLabel } from '../lib/format'
 
 export const jornadaText = (c: Caregiver) => c.jornadas.map((j) => labelOf(JORNADAS, j)).join(' · ') || 'Sin indicar'
 
-function CheckList({ items }: { items: ReactNode[] }) {
+const CHECK_TONES = { brand: 'bg-accent-soft text-accent', care: 'bg-care-soft text-care', sky: 'bg-sky text-ink' } as const
+
+function CheckList({ items, tone = 'brand' }: { items: ReactNode[]; tone?: keyof typeof CHECK_TONES }) {
   return (
     <ul className="space-y-2.5">
       {items.map((t, i) => (
         <li key={i} className="flex items-start gap-3">
-          <span aria-hidden className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent">
+          <span aria-hidden className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full ${CHECK_TONES[tone]}`}>
             <Check className="size-4" strokeWidth={3} />
           </span>
           {t}
@@ -42,7 +44,7 @@ export function CaregiverProfileView({ c, actions, fullName }: { c: Caregiver; a
               <div className="relative w-fit shrink-0">
                 <Avatar name={c.name} photo={c.photo} size={128} ring className="max-sm:!size-28" />
                 {c.trusted && (
-                  <span aria-hidden className="absolute right-0 bottom-1 flex size-10 items-center justify-center rounded-full bg-accent-strong text-white ring-4 ring-surface">
+                  <span aria-hidden className="absolute right-0 bottom-1 flex size-10 items-center justify-center rounded-full bg-sky text-ink ring-4 ring-surface">
                     <ShieldCheck className="size-5" strokeWidth={2.25} />
                   </span>
                 )}
@@ -101,7 +103,7 @@ export function CaregiverProfileView({ c, actions, fullName }: { c: Caregiver; a
             {c.experienceText && c.about && <p className="mt-3 max-w-[65ch] leading-relaxed text-ink-soft">{c.experienceText}</p>}
           </SectionCard>
           <SectionCard icon={GraduationCap} title="Formación y certificaciones">
-            {c.training.length ? <CheckList items={c.training.map((t) => (t === 'otra' && c.otherTraining ? c.otherTraining : TRAINING_SHORT[t]))} /> : <p className="text-muted">Sin formación indicada.</p>}
+            {c.training.length ? <CheckList tone="sky" items={c.training.map((t) => (t === 'otra' && c.otherTraining ? c.otherTraining : TRAINING_SHORT[t]))} /> : <p className="text-muted">Sin formación indicada.</p>}
           </SectionCard>
           <SectionCard icon={Award} title="Experiencia destacada">
             <CheckList items={highlights} />
@@ -110,7 +112,7 @@ export function CaregiverProfileView({ c, actions, fullName }: { c: Caregiver; a
                 <h3 className="mb-2 text-base font-semibold text-ink-soft">Ha cuidado a personas con:</h3>
                 <ul className="flex flex-wrap gap-2">
                   {c.illnesses.map((i) => (
-                    <li key={i} className="rounded-full bg-sunken px-3 py-1 text-sm text-ink">
+                    <li key={i} className="rounded-full bg-accent px-3 py-1 text-sm font-medium text-white">
                       {labelOf(ILLNESSES, i)}
                     </li>
                   ))}
@@ -121,7 +123,7 @@ export function CaregiverProfileView({ c, actions, fullName }: { c: Caregiver; a
         </div>
         <div className="space-y-5">
           <SectionCard icon={Heart} title="Cuidados que ofrece">
-            <CheckList items={c.careTypes.map((id) => labelOf(CARE_TYPES, id))} />
+            <CheckList tone="care" items={c.careTypes.map((id) => labelOf(CARE_TYPES, id))} />
             {tasks.length > 0 && (
               <ul className="mt-5 grid gap-4 border-t border-line pt-5 sm:grid-cols-2">
                 {tasks.map((t) => {
@@ -148,14 +150,14 @@ export function CaregiverProfileView({ c, actions, fullName }: { c: Caregiver; a
               </span>
             </p>
           </SectionCard>
-          <SectionCard icon={Languages} title="Otros datos">
-            <ul className="space-y-2.5">
-              <li className="flex items-center gap-3">
-                <Languages aria-hidden className="size-5 text-accent-icon" strokeWidth={2} />
+          <SectionCard icon={Languages} title="Otros datos" className="sm:py-5">
+            <ul className="flex flex-wrap gap-x-8 gap-y-2.5">
+              <li className="flex items-center gap-2.5">
+                <Languages aria-hidden className="size-5 shrink-0 text-sky" strokeWidth={2} />
                 {c.languages.join(', ')}
               </li>
-              <li className="flex items-center gap-3">
-                <Car aria-hidden className="size-5 text-accent-icon" strokeWidth={2} />
+              <li className="flex items-center gap-2.5">
+                <Car aria-hidden className="size-5 shrink-0 text-sky" strokeWidth={2} />
                 {c.drivingLicense ? (c.vehicle ? 'Carné de conducir y vehículo propio' : 'Carné de conducir') : 'Sin carné de conducir'}
               </li>
             </ul>

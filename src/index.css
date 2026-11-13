@@ -42,6 +42,12 @@
   --rose-700: #a8345a; /* relleno y texto rosa: 6:1 */
   --rose-800: #8f2b4c;
 
+  --cyan-50: #e9f9fb;
+  --cyan-100: #d3f3f6;
+  --cyan-200: #a7e6ee;
+  --cyan-500: #0dbdcf; /* cian de marca: rellenos con texto oscuro (5,8:1) e iconos decorativos */
+  --cyan-700: #077583; /* texto cian sobre fondos claros: 5,1:1 */
+
   --green-50: #e5f3e7;
   --green-700: #2f7a45;
   --green-800: #2f6f3e;
@@ -107,6 +113,13 @@
   --color-care-line: var(--rose-200);
   --color-care-soft: var(--rose-100);
   --color-care-subtle: var(--rose-50);
+
+  /* Cian (frescura y estados activos). Sobre el relleno siempre texto ink. */
+  --color-sky: var(--cyan-500);
+  --color-sky-ink: var(--cyan-700);
+  --color-sky-line: var(--cyan-200);
+  --color-sky-soft: var(--cyan-100);
+  --color-sky-subtle: var(--cyan-50);
 
   /* Estados */
   --color-ok: var(--green-700);
@@ -299,4 +312,16 @@
   .typing span:nth-child(3) {
     animation-delay: 0.3s;
   }
+}
+
+/* Portada: la foto se funde con el fondo crema (velo en degradado, sin marco). */
+.hero-veil {
+  background:
+    linear-gradient(to right, var(--color-canvas) 0%, color-mix(in oklab, var(--color-canvas) 85%, transparent) 12%, color-mix(in oklab, var(--color-canvas) 45%, transparent) 30%, transparent 55%),
+    linear-gradient(to top, var(--color-canvas) 0%, transparent 28%);
+}
+.hero-veil-mobile {
+  background:
+    linear-gradient(to bottom, var(--color-canvas) 0%, transparent 22%),
+    linear-gradient(to top, var(--color-surface) 0%, transparent 25%);
 }

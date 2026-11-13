@@ -31,14 +31,17 @@ import type { Caregiver, DocStatus } from '../data/types'
 
 /* ---------------------------------- Botones ---------------------------------- */
 
-type Variant = 'primary' | 'care' | 'outline' | 'soft' | 'ghost' | 'danger'
+type Variant = 'primary' | 'care' | 'sky' | 'outline' | 'soft' | 'soft-sky' | 'ghost' | 'danger'
 type Size = 'sm' | 'md' | 'lg'
 
 const variants: Record<Variant, string> = {
   primary: 'bg-accent text-white shadow-[0_1px_2px_oklch(0_0_0/0.12)] hover:bg-accent-hover',
   care: 'bg-care text-white shadow-[0_1px_2px_oklch(0_0_0/0.12)] hover:bg-care-hover',
+  sky: 'bg-sky text-ink shadow-[0_1px_2px_oklch(0_0_0/0.12)] hover:bg-sky-line',
   outline: 'border-2 border-accent bg-surface text-accent hover:bg-accent-subtle',
   soft: 'bg-accent-soft text-accent-strong hover:bg-accent-line',
+  // Sobre fondos oscuros: al pasar o pulsar, cian de marca.
+  'soft-sky': 'bg-accent-soft text-accent-strong hover:bg-sky active:bg-sky',
   ghost: 'text-accent hover:bg-accent-subtle',
   danger: 'border-2 border-care bg-surface text-care hover:bg-care-subtle',
 }
@@ -92,7 +95,7 @@ export function Button({ variant = 'primary', size = 'md', to, icon: Icon, iconR
 
 /** Enlace para volver atrás: discreto, con flecha y objetivo táctil de 44px. */
 export function BackLink({ to, onClick, children }: { to?: string; onClick?: () => void; children: ReactNode }) {
-  const cls = 'pressable -ms-2 inline-flex min-h-11 items-center gap-2 rounded-full px-2 font-semibold text-accent hover:bg-accent-subtle'
+  const cls = 'pressable -ms-2 inline-flex min-h-11 items-center gap-2 rounded-full px-2 font-semibold text-sky-ink hover:bg-sky-subtle'
   const inner = (
     <>
       <ArrowLeft aria-hidden className="size-5" strokeWidth={2.25} />
@@ -115,18 +118,18 @@ export function BackLink({ to, onClick, children }: { to?: string; onClick?: () 
 const badgeSize = (size: 'sm' | 'md') => (size === 'sm' ? 'gap-1 px-2.5 py-0.5 text-xs' : 'gap-1.5 px-3 py-1 text-sm')
 const badgeIcon = (size: 'sm' | 'md') => (size === 'sm' ? 'size-3.5' : 'size-4')
 
-export function TrustedBadge({ size = 'md' }: { size?: 'sm' | 'md' }) {
+export function TrustedBadge({ size = 'md', tone = 'sky' }: { size?: 'sm' | 'md'; tone?: 'sky' | 'care' }) {
   return (
-    <span className={cx('inline-flex items-center rounded-full bg-accent-strong font-semibold whitespace-nowrap text-white', badgeSize(size))}>
+    <span className={cx('inline-flex items-center rounded-full font-semibold whitespace-nowrap', tone === 'care' ? 'bg-care text-white' : 'bg-sky text-ink', badgeSize(size))}>
       <ShieldCheck aria-hidden className={badgeIcon(size)} strokeWidth={2.25} />
       Cuidadora de confianza
     </span>
   )
 }
 
-export function VerifiedBadge({ size = 'md' }: { size?: 'sm' | 'md' }) {
+export function VerifiedBadge({ size = 'md', tone = 'brand' }: { size?: 'sm' | 'md'; tone?: 'brand' | 'sky' }) {
   return (
-    <span className={cx('inline-flex items-center rounded-full bg-accent-soft font-semibold whitespace-nowrap text-accent-strong', badgeSize(size))}>
+    <span className={cx('inline-flex items-center rounded-full font-semibold whitespace-nowrap', tone === 'sky' ? 'bg-sky text-ink' : 'bg-accent-soft text-accent-strong', badgeSize(size))}>
       <BadgeCheck aria-hidden className={badgeIcon(size)} strokeWidth={2.25} />
       Documentación revisada
     </span>
@@ -166,8 +169,8 @@ export function DocStatusChip({ status }: { status: DocStatus }) {
 /** Disponible / No disponible: color + icono + texto. */
 export function AvailabilityPill({ available, size = 'md' }: { available: boolean; size?: 'sm' | 'md' }) {
   return (
-    <span className={cx('inline-flex items-center rounded-full font-semibold whitespace-nowrap', badgeSize(size), available ? 'bg-ok-soft text-ok-ink' : 'bg-off-soft text-off-ink')}>
-      <span aria-hidden className={cx('rounded-full', size === 'sm' ? 'size-2' : 'size-2.5', available ? 'bg-ok' : 'bg-off')} />
+    <span className={cx('inline-flex items-center rounded-full font-semibold whitespace-nowrap', badgeSize(size), available ? 'bg-sky text-ink' : 'bg-off-soft text-off-ink')}>
+      <span aria-hidden className={cx('rounded-full', size === 'sm' ? 'size-2' : 'size-2.5', available ? 'bg-white' : 'bg-off')} />
       {available ? 'Disponible' : 'No disponible'}
     </span>
   )
@@ -391,13 +394,13 @@ export function RadioCard({ checked, onChange, children, className, name }: { ch
       className={cx(
         'flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border-2 px-4 py-3.5 transition-[background-color,border-color] duration-150',
         'has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus',
-        checked ? 'border-accent bg-accent-subtle' : 'border-line bg-surface hover:border-accent-line',
+        checked ? 'border-accent bg-accent-soft' : 'border-line bg-surface hover:border-accent-line',
         className,
       )}
     >
       <input type="radio" name={name} className="sr-only" checked={checked} onChange={onChange} />
       <span aria-hidden className={cx('flex size-6 shrink-0 items-center justify-center rounded-full border-2', checked ? 'border-accent' : 'border-field')}>
-        {checked && <span className="size-3 rounded-full bg-accent" />}
+        {checked && <span className="size-3 rounded-full bg-sky" />}
       </span>
       <span className="min-w-0 flex-1">{children}</span>
     </label>
@@ -476,9 +479,9 @@ export function SectionCard({ icon: Icon, title, action, children, className }: 
   )
 }
 
-export function InfoNote({ children, tone = 'brand', icon: Icon = Info }: { children: ReactNode; tone?: 'brand' | 'rosa'; icon?: LucideIcon }) {
+export function InfoNote({ children, tone = 'brand', icon: Icon = Info, className }: { children: ReactNode; tone?: 'brand' | 'rosa'; icon?: LucideIcon; className?: string }) {
   return (
-    <div className={cx('flex items-start gap-3 rounded-2xl px-4 py-3.5', tone === 'brand' ? 'bg-accent-subtle text-ink' : 'bg-care-subtle text-ink')}>
+    <div className={cx('flex items-start gap-3 rounded-2xl px-4 py-3.5 text-ink', tone === 'brand' ? 'bg-accent-subtle' : 'bg-care-subtle', className)}>
       <Icon aria-hidden className={cx('mt-0.5 size-[22px] shrink-0', tone === 'brand' ? 'text-accent' : 'text-care')} strokeWidth={2} />
       <div className="min-w-0">{children}</div>
     </div>
@@ -599,11 +602,20 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
   )
 }
 
-export function IconBubble({ icon: Icon, tone = 'brand', size = 'md' }: { icon: LucideIcon; tone?: 'brand' | 'rosa'; size?: 'sm' | 'md' | 'lg' }) {
+const BUBBLE_TONES = {
+  brand: 'bg-accent-soft text-accent',
+  rosa: 'bg-care-soft text-care',
+  sky: 'bg-sky-soft text-sky-ink',
+  'sky-solid': 'bg-sky text-ink',
+  solid: 'bg-accent text-white',
+  'rosa-solid': 'bg-care text-white',
+} as const
+
+export function IconBubble({ icon: Icon, tone = 'brand', size = 'md' }: { icon: LucideIcon; tone?: keyof typeof BUBBLE_TONES; size?: 'sm' | 'md' | 'lg' }) {
   const s = size === 'lg' ? 'size-14' : size === 'sm' ? 'size-10' : 'size-12'
   const i = size === 'lg' ? 'size-7' : size === 'sm' ? 'size-5' : 'size-6'
   return (
-    <span aria-hidden className={cx('inline-flex shrink-0 items-center justify-center rounded-full', s, tone === 'brand' ? 'bg-accent-soft text-accent' : 'bg-care-soft text-care')}>
+    <span aria-hidden className={cx('inline-flex shrink-0 items-center justify-center rounded-full', s, BUBBLE_TONES[tone])}>
       <Icon className={i} strokeWidth={1.75} />
     </span>
   )

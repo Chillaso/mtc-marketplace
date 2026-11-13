@@ -94,7 +94,7 @@ function MessagesInner({ selectedId }: { selectedId?: string }) {
         <aside aria-label="Conversaciones" className={cx('card flex min-h-0 flex-col overflow-hidden', selected && 'max-lg:hidden')}>
           <div className="px-5 pt-5 pb-3">
             <h1 className="text-3xl font-bold">Mensajes</h1>
-            <div role="group" aria-label="Filtrar conversaciones" className="mt-4 grid grid-cols-2 gap-1 rounded-full bg-sunken p-1">
+            <div role="group" aria-label="Filtrar conversaciones" className="mt-4 grid grid-cols-2 gap-1 rounded-full bg-sky-soft p-1">
               {(
                 [
                   ['todos', 'Todas'],
@@ -106,7 +106,7 @@ function MessagesInner({ selectedId }: { selectedId?: string }) {
                   type="button"
                   aria-pressed={filter === k}
                   onClick={() => setFilter(k)}
-                  className={cx('min-h-11 rounded-full px-3 font-semibold transition-[background-color,color,box-shadow] duration-150', filter === k ? 'bg-surface text-ink shadow-card' : 'text-ink-soft hover:text-ink')}
+                  className={cx('min-h-11 rounded-full px-3 font-semibold transition-[background-color,color,box-shadow] duration-150', filter === k ? 'bg-sky text-ink shadow-card' : 'text-ink hover:bg-sky-line/60')}
                 >
                   {l}
                 </button>
@@ -294,7 +294,7 @@ function Chat({ r }: { r: ContactRequest }) {
             </button>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-ok-soft px-5 py-2 text-sm font-medium text-ok-ink">
+        <div className="flex items-center gap-2 bg-care-soft px-5 py-2 text-sm font-medium text-care">
           <Handshake aria-hidden className="size-5 shrink-0" strokeWidth={2} />
           Match confirmado: ya podéis hablar y organizar los detalles del cuidado.
         </div>
@@ -436,8 +436,8 @@ function Chat({ r }: { r: ContactRequest }) {
               },
             ].map((x) => (
               <li key={x.t}>
-                <button type="button" onClick={x.on} className="pressable flex min-h-12 w-full items-center gap-3 rounded-2xl bg-sunken px-4 text-start font-medium hover:bg-accent-subtle">
-                  <x.icon aria-hidden className="size-5 text-accent-icon" strokeWidth={2} />
+                <button type="button" onClick={x.on} className="pressable flex min-h-12 w-full items-center gap-3 rounded-2xl bg-sky-subtle px-4 text-start font-medium hover:bg-sky-soft">
+                  <x.icon aria-hidden className="size-5 text-sky-ink" strokeWidth={2} />
                   {x.t}
                 </button>
               </li>
@@ -490,7 +490,7 @@ function Chat({ r }: { r: ContactRequest }) {
       </Modal>
 
       <Modal open={modal === 'detail'} onClose={() => setModal(null)} title="Solicitud de contacto">
-        <blockquote className="mb-4 rounded-2xl bg-sunken p-4">«{r.need}»</blockquote>
+        <blockquote className="mb-4 rounded-2xl bg-accent-soft p-4">«{r.need}»</blockquote>
         {detail}
         <p className="mt-4 text-sm text-muted">
           Enviada el {fmtDate(r.createdAt)}

@@ -83,8 +83,8 @@ const useFamily = () => useMe().family as Family
 
 export function RequestStatusChip({ status }: { status: ContactRequest['status'] }) {
   const map = {
-    aceptada: ['bg-ok-soft text-ok-ink', 'En conversación', MessageCircleMore],
-    pendiente: ['bg-warn-soft text-warn-ink', 'Pendiente de respuesta', Clock],
+    aceptada: ['bg-sky text-ink', 'En conversación', MessageCircleMore],
+    pendiente: ['bg-care-soft text-care', 'Pendiente de respuesta', Clock],
     rechazada: ['bg-off-soft text-off-ink', 'No disponible', X],
     cancelada: ['bg-off-soft text-off-ink', 'Cancelada', X],
   } as const
@@ -97,13 +97,11 @@ export function RequestStatusChip({ status }: { status: ContactRequest['status']
   )
 }
 
-function Panel({ icon: Icon, title, action, children }: { icon: typeof Heart; title: ReactNode; action?: ReactNode; children: ReactNode }) {
+function Panel({ icon, title, action, children, tone = 'brand' }: { icon: typeof Heart; title: ReactNode; action?: ReactNode; children: ReactNode; tone?: 'brand' | 'rosa' | 'sky-solid' }) {
   return (
     <section className="card overflow-hidden">
       <header className="flex items-center gap-3 border-b border-line px-5 py-4">
-        <span aria-hidden className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent-subtle text-accent">
-          <Icon className="size-5" strokeWidth={2} />
-        </span>
+        <IconBubble icon={icon} size="sm" tone={tone} />
         <h2 className="flex-1 text-xl font-semibold">{title}</h2>
         {action}
       </header>
@@ -120,16 +118,18 @@ function FavoriteItem({ id }: { id: string }) {
   const c = state.caregivers.find((x) => x.id === id)
   if (!c) return null
   return (
-    <li className="flex flex-wrap items-center gap-4 px-5 py-4">
-      <Avatar name={c.name} photo={c.photo} size={64} />
-      <div className="min-w-0 flex-1">
-        <h3 className="text-lg font-semibold">{shortName(c.name)}</h3>
-        <CaregiverBadges c={c} size="sm" />
-        <div className="mt-1">
-          <Stars rating={c.rating} reviews={c.reviews} size="sm" />
+    <li className="px-5 py-4">
+      <div className="flex items-center gap-4">
+        <Avatar name={c.name} photo={c.photo} size={64} />
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-semibold">{shortName(c.name)}</h3>
+          <CaregiverBadges c={c} size="sm" />
+          <div className="mt-1">
+            <Stars rating={c.rating} reviews={c.reviews} size="sm" />
+          </div>
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="mt-3 flex items-center gap-2 sm:ps-20">
         <button
           type="button"
           onClick={() => toggleFavorite(fam.id, c.id)}
@@ -192,7 +192,7 @@ function RequestModal({ r, onClose }: { r: ContactRequest | null; onClose: () =>
         </div>
         <RequestStatusChip status={r.status} />
       </div>
-      <blockquote className="mt-4 rounded-2xl bg-sunken p-4">«{r.need}»</blockquote>
+      <blockquote className="mt-4 rounded-2xl bg-accent-soft p-4">«{r.need}»</blockquote>
       <dl className="mt-4 grid grid-cols-2 gap-4">
         <div>
           <dt className="text-sm text-muted">Persona</dt>
@@ -293,7 +293,7 @@ export function FamilyHome() {
         {[
           { to: '/buscar', icon: Search, t: 'Buscar cuidadora', d: 'Encuentra a la persona que mejor se adapte', tone: 'brand' as const },
           { to: '/familia/favoritas', icon: Heart, t: 'Mis favoritas', d: 'Cuidadoras que has guardado', tone: 'rosa' as const },
-          { to: '/familia/solicitudes', icon: MessageCircleMore, t: 'Mis solicitudes', d: 'Contactos que has enviado', tone: 'brand' as const },
+          { to: '/familia/solicitudes', icon: MessageCircleMore, t: 'Mis solicitudes', d: 'Contactos que has enviado', tone: 'sky-solid' as const },
         ].map((x) => (
           <li key={x.to}>
             <Link to={x.to} className="card pressable flex h-full items-center gap-4 p-5 hover:shadow-card-hover">
@@ -310,6 +310,7 @@ export function FamilyHome() {
       <div className="grid items-start gap-5 xl:grid-cols-2">
         <Panel
           icon={Heart}
+          tone="rosa"
           title={`Mis favoritas (${fam.favorites.length})`}
           action={
             <Link to="/familia/favoritas" className={seeAll}>
@@ -333,6 +334,7 @@ export function FamilyHome() {
         <div className="space-y-5">
           <Panel
             icon={MessageCircleMore}
+            tone="sky-solid"
             title={`Mis solicitudes (${requests.length})`}
             action={
               <Link to="/familia/solicitudes" className={seeAll}>
@@ -566,25 +568,25 @@ export function FamilyHelp() {
           </details>
         ))}
       </div>
-      <section aria-labelledby="contacto" className="card mt-6 p-5 sm:p-6">
-        <h2 id="contacto" className="text-xl font-semibold">
+      <section aria-labelledby="contacto" className="on-dark mt-6 rounded-[20px] bg-accent-strong p-5 text-white sm:p-6">
+        <h2 id="contacto" className="text-xl font-semibold text-white">
           ¿Prefieres hablar con nosotros?
         </h2>
-        <ul className="mt-4 grid gap-3 text-ink-soft sm:grid-cols-2">
+        <ul className="mt-4 grid gap-3 text-white/90 sm:grid-cols-2">
           <li className="flex items-center gap-3">
-            <Phone aria-hidden className="size-5 text-accent-icon" strokeWidth={2} />
+            <Phone aria-hidden className="size-5 text-accent-on-dark" strokeWidth={2} />
             956 000 000
           </li>
           <li className="flex items-center gap-3">
-            <Mail aria-hidden className="size-5 text-accent-icon" strokeWidth={2} />
+            <Mail aria-hidden className="size-5 text-accent-on-dark" strokeWidth={2} />
             hola@mariatecuida.es
           </li>
           <li className="flex items-center gap-3">
-            <MapPin aria-hidden className="size-5 text-accent-icon" strokeWidth={2} />
+            <MapPin aria-hidden className="size-5 text-accent-on-dark" strokeWidth={2} />
             Provincia de Cádiz
           </li>
           <li className="flex items-center gap-3">
-            <Clock aria-hidden className="size-5 text-accent-icon" strokeWidth={2} />
+            <Clock aria-hidden className="size-5 text-accent-on-dark" strokeWidth={2} />
             Lunes a viernes, de 9:00 a 19:00
           </li>
         </ul>
